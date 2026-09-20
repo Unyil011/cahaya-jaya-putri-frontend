@@ -220,7 +220,7 @@ export const generateInvoicePDF = (order, type) => {
     // doc.text('Tanda Tangan & Nama Penerima', 40, finalY + 55, { align: 'center' });
     
     doc.setFontSize(10);
-    doc.text('Supir,', pageWidth / 2, finalY + 30, { align: 'center' });
+    doc.text('Sopir,', pageWidth / 2, finalY + 30, { align: 'center' });
     doc.line(pageWidth / 2 - 25, finalY + 50, pageWidth / 2 + 25, finalY + 50);
     doc.setFontSize(8);
     // doc.text('Tanda Tangan & Nama Terang', pageWidth / 2, finalY + 55, { align: 'center' });
