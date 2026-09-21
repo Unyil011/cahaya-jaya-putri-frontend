@@ -83,6 +83,7 @@ export default function AdminDashboard() {
         date: new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
         status: o.status,
         paymentStatus: o.payment_status,
+        paymentProofUrl: o.payment_proof_url,
         totalAmount: o.total_amount,
         items: o.order_items.map(i => ({
           id: i.id,
