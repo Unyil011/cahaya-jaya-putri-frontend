@@ -237,7 +237,13 @@ export default function ClientDashboard() {
           {/* Judul Halaman di Topbar */}
           <div className={`${showMobileSearch ? 'hidden md:block' : 'block'}`}>
             <h1 className="text-lg md:text-xl font-bold text-mbg-blue-900 dark:text-white transition-colors flex items-center gap-2">
-              <Package className="w-5 h-5 text-mbg-blue-600 md:hidden" />
+              {currentView === 'create' ? (
+                <ShoppingCart className="w-5 h-5 text-mbg-blue-600 md:hidden" />
+              ) : currentView === 'active' ? (
+                <Package className="w-5 h-5 text-mbg-blue-600 md:hidden" />
+              ) : (
+                <History className="w-5 h-5 text-mbg-blue-600 md:hidden" />
+              )}
               {currentView === 'create' ? 'Buat Pesanan Baru' : currentView === 'active' ? 'Pesanan Berjalan' : 'Riwayat Pesanan'}
             </h1>
             <p className="hidden md:block text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-0.5 transition-colors">
@@ -521,7 +527,7 @@ export default function ClientDashboard() {
           onClick={() => setCurrentView('create')}
           className={`relative p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'create' ? 'text-mbg-blue-600 bg-mbg-blue-50 dark:bg-mbg-blue-900/30' : 'text-gray-500'}`}
         >
-          <Plus className="w-6 h-6" />
+          <ShoppingCart className="w-6 h-6" />
         </button>
         <button
           onClick={() => setCurrentView('active')}
