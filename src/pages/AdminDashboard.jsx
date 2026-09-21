@@ -229,7 +229,7 @@ export default function AdminDashboard() {
     return colors[status] || 'bg-gray-100 text-gray-500';
   };
 
-  const activeOrdersCount = orders.filter(o => o.status !== 'completed').length;
+  const activeOrdersCount = orders.filter(o => o.status !== 'completed' && o.status !== 'shipped_return').length;
 
   const clientOptions = ['Semua', ...new Set(orders.map(o => o.clientName))];
 
