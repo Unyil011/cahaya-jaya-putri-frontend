@@ -1,3 +1,4 @@
+import formatIndonesianDate from './dateFormatter';
 ﻿import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -85,7 +86,7 @@ export const generateInvoicePDF = (order, type) => {
     doc.setFont('helvetica', 'normal');
     
     // Format date properly
-    let dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '14 September 2026';
+    let dateStr = order.created_at ? formatIndonesianDate(order.created_at, false) : '14 September 2026';
     doc.text(`: ${dateStr}`, 155, 50);
     
     
@@ -98,7 +99,7 @@ export const generateInvoicePDF = (order, type) => {
     doc.setFont('helvetica', 'bold');
     doc.text('Tanggal', 120, 50);
     doc.setFont('helvetica', 'normal');
-    let dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}) : '14 September 2026';
+    let dateStr = order.created_at ? formatIndonesianDate(order.created_at, false) : '14 September 2026';
     doc.text(`: ${dateStr}`, 145, 50);
     
     doc.text('Bersama ini kami kirimkan barang-barang sebagai berikut:', 14, 62);

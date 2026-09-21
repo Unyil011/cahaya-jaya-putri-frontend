@@ -1,3 +1,4 @@
+import formatIndonesianDate from '../../utils/dateFormatter';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PackageOpen, CheckCircle, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
@@ -53,7 +54,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
         status: o.status,
         paymentStatus: o.payment_status,
         totalAmount: o.total_amount,
-        date: (o.custom_order_date ? new Date(o.custom_order_date) : new Date(o.created_at)).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        date: formatIndonesianDate(o.custom_order_date || o.created_at, true),
         created_at: o.custom_order_date || o.created_at,
         items: o.order_items.map(i => ({
           id: i.id,

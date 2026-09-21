@@ -1,3 +1,4 @@
+import formatIndonesianDate from '../utils/dateFormatter';
 import { useState, useRef, useEffect } from 'react';
 import OverviewDashboard from '../components/admin/OverviewDashboard';
 import ReturnsManagement from '../components/admin/ReturnsManagement';
@@ -80,7 +81,7 @@ export default function AdminDashboard() {
         id: o.id,
         orderNumber: o.order_number,
         clientName: o.profiles?.name || 'Unknown',
-        date: (o.custom_order_date ? new Date(o.custom_order_date) : new Date(o.created_at)).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        date: formatIndonesianDate(o.custom_order_date || o.created_at, true),
         created_at: o.custom_order_date || o.created_at,
         status: o.status,
         paymentStatus: o.payment_status,
