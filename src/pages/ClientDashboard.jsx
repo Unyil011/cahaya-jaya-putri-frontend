@@ -1,6 +1,6 @@
 import { ShoppingCart, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Send, ShoppingBag, LogOut, Package, User, Moon, Sun, ChevronDown, History, Search, X, Filter } from 'lucide-react';
+import { ShoppingCart, Plus, Trash2, Send, ShoppingBag, LogOut, Package, User, Moon, Sun, ChevronDown, History, Search, X, Filter } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
