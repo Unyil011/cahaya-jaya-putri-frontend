@@ -302,15 +302,15 @@ export default function AdminDashboard() {
           <div className={`${showMobileSearch ? 'hidden md:block' : 'block'}`}>
             <h1 className="text-lg md:text-xl font-bold text-mbg-blue-900 dark:text-white transition-colors flex items-center gap-2">
               {currentView === 'overview' ? (
-                <><LayoutDashboard className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Ringkasan Dashboard</>
+                <><Home className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Ringkasan Dashboard</>
               ) : currentView === 'incoming' ? (
-                <><FileText className="w-5 h-5 text-pink-600 md:hidden" /> Pesanan Masuk</>
+                <><Inbox className="w-5 h-5 text-pink-600 md:hidden" /> Pesanan Masuk</>
               ) : currentView === 'history' ? (
-                <><CheckCircle className="w-5 h-5 text-green-600 md:hidden" /> Riwayat Pesanan</>
+                <><History className="w-5 h-5 text-green-600 md:hidden" /> Riwayat Pesanan</>
               ) : currentView === 'returns' ? (
-                <><PackageOpen className="w-5 h-5 text-orange-600 md:hidden" /> Manajemen Retur</>
+                <><Undo2 className="w-5 h-5 text-orange-600 md:hidden" /> Manajemen Retur</>
               ) : currentView === 'inventory' ? (
-                <><Archive className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Data Barang</>
+                <><Boxes className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Data Barang</>
               ) : (
                 <><Users className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Kelola SPPG</>
               )}
@@ -520,14 +520,14 @@ export default function AdminDashboard() {
             onClick={() => setCurrentView('overview')}
             className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'overview' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
-            <LayoutDashboard className="w-6 h-6" />
+            <Home className="w-6 h-6" />
           </button>
 
           <button
             onClick={() => setCurrentView('incoming')}
             className={`relative p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'incoming' ? 'text-pink-600 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
-            <FileText className="w-6 h-6" />
+            <Inbox className="w-6 h-6" />
             {activeOrdersCount > 0 && (
               <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900">
                 {activeOrdersCount}
@@ -539,21 +539,21 @@ export default function AdminDashboard() {
             onClick={() => setCurrentView('history')}
             className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'history' ? 'text-pink-600 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
-            <CheckCircle className="w-6 h-6" />
+            <History className="w-6 h-6" />
           </button>
 
           <button
             onClick={() => setCurrentView('returns')}
             className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'returns' ? 'text-pink-600 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
-            <PackageOpen className="w-6 h-6" />
+            <Undo2 className="w-6 h-6" />
           </button>
           
           <button
             onClick={() => setCurrentView('inventory')}
             className={`p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'inventory' ? 'text-mbg-blue-600 bg-mbg-blue-50 dark:bg-mbg-blue-900/30 dark:text-mbg-blue-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
-            <Archive className="w-6 h-6" />
+            <Boxes className="w-6 h-6" />
           </button>
 
           <button
