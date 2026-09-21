@@ -53,7 +53,8 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
         status: o.status,
         paymentStatus: o.payment_status,
         totalAmount: o.total_amount,
-        date: new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        date: (o.custom_order_date ? new Date(o.custom_order_date) : new Date(o.created_at)).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        created_at: o.custom_order_date || o.created_at,
         items: o.order_items.map(i => ({
           id: i.id,
           itemName: i.item_name,

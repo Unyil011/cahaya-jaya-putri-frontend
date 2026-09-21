@@ -1,22 +1,63 @@
 ﻿import fs from 'fs';
 let code = fs.readFileSync('src/components/admin/InventoryManagement.jsx', 'utf8');
 
-if (!code.includes('import { supabase }')) {
-  code = code.replace("import toast from 'react-hot-toast';", "import toast from 'react-hot-toast';\nimport { supabase } from '../../supabaseClient';");
-}
+const submitReplacement = `const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
 
-code = code.replace(/const response = await api\.get\('\/inventories'\);\n\s*setInventories\(response\.data\);/, "const { data, error } = await supabase.from('inventory').select('*').order('item_name');\n      if (error) throw error;\n      setInventories(data);");
+    try {
+      setIsSubmitting(true);
+      let error;
+      if (currentInventory) {
+        const result = await supabase.from('inventory').update({ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }).eq('id', currentInventory.id);
+        error = result.error;
+      } else {
+        const result = await supabase.from('inventory').insert([{ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }]);
+        error = result.error;
+      }
+      if (error) throw error;
+      
+      handleCloseModal();
+      fetchInventories();
+      toast.success('Data berhasil disimpan');
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Terjadi kesalahan saat menyimpan data');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };`;
+code = code.replace(/const handleSubmit = async \([\s\S]*?finally \{\s*setIsSubmitting\(false\);\s*\}\s*\};/, submitReplacement);
 
-code = code.replace(/await api\.post\('\/inventories', payload\);/, "await supabase.from('inventory').insert([{\n        item_name: payload.itemName,\n        stock: payload.stock,\n        base_price: payload.basePrice\n      }]);");
-
-code = code.replace(/await api\.put\(\`\/inventories\/\$\{editingId\}\`, payload\);/, "await supabase.from('inventory').update({\n        item_name: payload.itemName,\n        stock: payload.stock,\n        base_price: payload.basePrice\n      }).eq('id', editingId);");
-
-code = code.replace(/await api\.delete\(\`\/inventories\/\$\{id\}\`\);/, "await supabase.from('inventory').delete().eq('id', id);");
-
-// Ensure item names match the database columns in JSX
-// e.g., inventory.item_name instead of inventory.itemName
-code = code.replace(/inventory\.itemName/g, "inventory.item_name");
-code = code.replace(/inventory\.basePrice/g, "inventory.base_price");
+const stockReplacement = `const handleUpdateStockSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    try {
+      setIsSubmitting(true);
+      
+      for (const row of stockRows) {
+        if (!row.id || row.quantity === '') continue;
+        const item = inventories.find(inv => inv.id === row.id);
+        if (!item) continue;
+        
+        let qty = parseFloat(row.quantity);
+        if (row.type === 'kurang') qty = -qty;
+        
+        const { error } = await supabase.from('inventory').update({ stock: item.stock + qty }).eq('id', item.id);
+        if (error) throw error;
+      }
+      
+      handleCloseModal();
+      fetchInventories();
+      toast.success('Stok berhasil diperbarui');
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal memperbarui stok');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };`;
+code = code.replace(/const handleUpdateStockSubmit = async \([\s\S]*?finally \{\s*setIsSubmitting\(false\);\s*\}\s*\};/, stockReplacement);
 
 fs.writeFileSync('src/components/admin/InventoryManagement.jsx', code);
-console.log('Fixed InventoryManagement');
+console.log("Fixed InventoryManagement error handling");

@@ -80,7 +80,8 @@ export default function AdminDashboard() {
         id: o.id,
         orderNumber: o.order_number,
         clientName: o.profiles?.name || 'Unknown',
-        date: new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        date: (o.custom_order_date ? new Date(o.custom_order_date) : new Date(o.created_at)).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+        created_at: o.custom_order_date || o.created_at,
         status: o.status,
         paymentStatus: o.payment_status,
         paymentProofUrl: o.payment_proof_url,
@@ -128,13 +129,19 @@ export default function AdminDashboard() {
   }, []);
 
   const handlePriceChange = (orderId, itemId, field, value) => {
+    let numericValue = value;
+    if (field === 'sellingPrice' || field === 'hpp') {
+      numericValue = value.replace(/^0+(?=\d)/, '');
+      if (parseFloat(numericValue) < 0) numericValue = '0';
+    }
+    
     setOrders(orders.map(order => {
       if (order.id === orderId) {
         return {
           ...order,
           items: order.items.map(item => {
             if (item.id === itemId) {
-              return { ...item, [field]: value };
+              return { ...item, [field]: numericValue };
             }
             return item;
           })

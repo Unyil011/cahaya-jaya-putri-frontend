@@ -34,6 +34,8 @@ export default function ClientDashboard() {
   ]);
   
   const [inventories, setInventories] = useState([]);
+  const [customDate, setCustomDate] = useState('');
+  const [customTime, setCustomTime] = useState('');
 
   useEffect(() => {
     const fetchInventories = async () => {
@@ -173,6 +175,8 @@ export default function ClientDashboard() {
 
       toast.success('Pesanan berhasil dikirim ke Supplier!');
       setItems([{ id: 1, itemName: '', quantity: '', unit: '' }]);
+      setCustomDate('');
+      setCustomTime('');
       setTimeout(() => setCurrentView('active'), 1000);
     } catch (error) {
       toast.error('Gagal mengirim pesanan');
@@ -386,6 +390,34 @@ export default function ClientDashboard() {
                 className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl border border-white/50 dark:border-slate-700/50 transition-colors"
               >
                 <form onSubmit={handleSubmit}>
+
+                  {/* Custom Date Time Selection */}
+                  <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Tanggal Pesanan (Opsional)
+                      </label>
+                      <input 
+                        type="date"
+                        value={customDate}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 bg-white dark:bg-slate-700 dark:text-white"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Kosongkan jika untuk hari ini.</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                        Waktu Pesanan (Opsional)
+                      </label>
+                      <input 
+                        type="time"
+                        value={customTime}
+                        onChange={(e) => setCustomTime(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 bg-white dark:bg-slate-700 dark:text-white"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Hanya berlaku jika tanggal diisi.</p>
+                    </div>
+                  </div>
 
                   {/* Dynamic Rows Container */}
                   <div className="mb-8 w-full overflow-x-auto pb-4">
