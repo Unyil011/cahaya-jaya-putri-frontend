@@ -72,16 +72,16 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
   };
 
   const getStatusBadge = (status) => {
-    switch(status) {
-      case 'pending': return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold border border-yellow-200">Menunggu Harga</span>;
-      case 'processing': return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">Diproses</span>;
-      case 'priced': return <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">Diproses / Dikirim</span>;
-      case 'shipped': return <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-bold border border-purple-200">Dikirim</span>;
-      case 'shipped_return': return <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold border border-orange-200">Retur Diproses (Menunggu Konfirmasi Anda)</span>;
-      default: return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold border border-gray-200">Unknown</span>;
+    switch (status) {
+      case 'pending': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800/50">Menunggu Harga</span>;
+      case 'priced': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">Harga Ditetapkan</span>;
+      case 'processing': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 border border-pink-200 dark:border-pink-800/50">Sedang Disiapkan</span>;
+      case 'shipped': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50">Sedang Dikirim</span>;
+      default: return <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">Unknown</span>;
     }
   };
-const getIconColor = (status) => {
+
+  const getIconColor = (status) => {
     const colors = {
       pending: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400',
       processing: 'bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400',
