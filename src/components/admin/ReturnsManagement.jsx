@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Eye, PackageOpen, AlertTriangle, ChevronRight, Package, Ban } from 'lucide-react';
+import { Truck, Wallet, Check, X, Eye, PackageOpen, AlertTriangle, ChevronRight, Package, Ban } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../supabaseClient';
 import api from '../../api';
@@ -220,14 +220,14 @@ export default function ReturnsManagement({ isDarkMode }) {
                                     className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                                     title="Kirim Ulang"
                                   >
-                                    <Package className="w-4 h-4" />
+                                    <Truck className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleResolveItem(item.id, 'refunded')}
                                     className="p-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-colors"
                                     title="Potong Tagihan"
                                   >
-                                    <Check className="w-4 h-4" />
+                                    <Wallet className="w-4 h-4" />
                                   </button>
                                   <button
                                     onClick={() => handleResolveItem(item.id, 'rejected')}
