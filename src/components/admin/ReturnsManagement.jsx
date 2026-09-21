@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { supabase } from '../../supabaseClient';
 import api from '../../api';
 
-export default function ReturnsManagement({ isDarkMode }) {
+export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedReturn, setExpandedReturn] = useState(null);
@@ -37,7 +37,7 @@ export default function ReturnsManagement({ isDarkMode }) {
               }
             },
             created_at: r.created_at,
-            status: r.status, // overall status
+            status: 'resolved', // will be overwritten below if any pending
             items: []
           };
         }
@@ -50,16 +50,17 @@ export default function ReturnsManagement({ isDarkMode }) {
           },
           qty_returned: r.quantity,
           reason: r.reason,
-          action_preference: r.action,
-          status: r.status
+          status: r.status,
+          action_preference: r.action_preference
         });
-        
-        // Update overall status to pending if any item is pending
-        if (r.status === 'pending') {
-          grouped[orderId].status = 'pending';
-        }
       });
       
+      // Compute overall status for each group
+      Object.values(grouped).forEach(group => {
+        const hasPending = group.items.some(item => item.status === 'pending');
+        group.status = hasPending ? 'pending' : 'resolved';
+      });
+
       setReturns(Object.values(grouped));
     } catch (error) {
       console.error(error);
@@ -85,24 +86,23 @@ export default function ReturnsManagement({ isDarkMode }) {
       if (error) throw error;
       
       // Update local state properly for nested items
-      let isAllResolved = true;
-      setReturns(returns.map(group => {
+      setReturns(prev => prev.map(group => {
         if (group.id !== orderId) return group;
-        
         const newItems = group.items.map(item => item.id === itemId ? { ...item, status: resolution } : item);
         const hasPending = newItems.some(i => i.status === 'pending');
-        isAllResolved = !hasPending;
-        
-        return {
-          ...group,
-          items: newItems,
-          status: hasPending ? 'pending' : 'resolved'
-        };
+        return { ...group, items: newItems, status: hasPending ? 'pending' : 'resolved' };
       }));
 
-      // If all items for this order are resolved, mark the order as completed
-      if (isAllResolved) {
+      // Check DB directly to avoid React closure race conditions
+      const { data: pendingReturns, error: pendingErr } = await supabase
+        .from('returns')
+        .select('id')
+        .eq('order_id', orderId)
+        .eq('status', 'pending');
+        
+      if (!pendingErr && pendingReturns.length === 0) {
          await supabase.from('orders').update({ status: 'completed' }).eq('id', orderId);
+         if (fetchOrders) fetchOrders(); // Sync AdminDashboard
       }
       
       toast.success('Status retur berhasil diperbarui', { id: toastId });
