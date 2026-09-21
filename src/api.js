@@ -25,14 +25,7 @@ api.interceptors.request.use(
 );
 
 // Add a response interceptor to handle 401 Unauthorized
-api.interceptors.response.use(
-    (response) => {
-        return response;
-    },
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            // Token is invalid or expired
-            localStorage.removeItem('auth_token');
+
             localStorage.removeItem('authRole');
             localStorage.removeItem('user');
             // Redirect to login page

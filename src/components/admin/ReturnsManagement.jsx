@@ -71,7 +71,7 @@ export default function ReturnsManagement({ isDarkMode }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleResolveItem = async (itemId, resolution) => {
+  const handleResolveItem = async (itemId, orderId, resolution) => {
     if (isSubmitting) return;
     try {
       setIsSubmitting(true);
@@ -84,7 +84,27 @@ export default function ReturnsManagement({ isDarkMode }) {
         
       if (error) throw error;
       
-      setReturns(returns.map(r => r.id === itemId ? { ...r, status: resolution } : r));
+      // Update local state properly for nested items
+      let isAllResolved = true;
+      setReturns(returns.map(group => {
+        if (group.id !== orderId) return group;
+        
+        const newItems = group.items.map(item => item.id === itemId ? { ...item, status: resolution } : item);
+        const hasPending = newItems.some(i => i.status === 'pending');
+        isAllResolved = !hasPending;
+        
+        return {
+          ...group,
+          items: newItems,
+          status: hasPending ? 'pending' : 'resolved'
+        };
+      }));
+
+      // If all items for this order are resolved, mark the order as completed
+      if (isAllResolved) {
+         await supabase.from('orders').update({ status: 'completed' }).eq('id', orderId);
+      }
+      
       toast.success('Status retur berhasil diperbarui', { id: toastId });
     } catch (error) {
       console.error(error);
@@ -216,21 +236,21 @@ export default function ReturnsManagement({ isDarkMode }) {
                               {item.status === 'pending' ? (
                                 <>
                                   <button
-                                    onClick={() => handleResolveItem(item.id, 'replaced')}
+                                    onClick={() => handleResolveItem(item.id, ret.id, 'replaced')}
                                     className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                                     title="Kirim Ulang"
                                   >
                                     <Truck className="w-4 h-4" />
                                   </button>
                                   <button
-                                    onClick={() => handleResolveItem(item.id, 'refunded')}
+                                    onClick={() => handleResolveItem(item.id, ret.id, 'refunded')}
                                     className="p-1.5 rounded-lg bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-colors"
                                     title="Potong Tagihan"
                                   >
                                     <Wallet className="w-4 h-4" />
                                   </button>
                                   <button
-                                    onClick={() => handleResolveItem(item.id, 'rejected')}
+                                    onClick={() => handleResolveItem(item.id, ret.id, 'rejected')}
                                     className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
                                     title="Tolak Retur"
                                   >

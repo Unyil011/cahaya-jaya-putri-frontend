@@ -28,7 +28,7 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
           payment_status,
           total_amount,
           created_at,
-          order_items (*)
+          order_items (*), returns (*)
         `)
         .eq('user_id', userData.id)
         .eq('is_deleted_by_client', false)
@@ -50,7 +50,8 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
           quantity: i.quantity,
           unit: i.unit,
           sellingPrice: i.selling_price
-        }))
+        })),
+        returns: o.returns
       }));
       
       setOrders(formattedOrders);
