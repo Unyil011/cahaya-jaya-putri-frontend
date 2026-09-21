@@ -282,14 +282,33 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
                       </div>
                     )}
 
-                    {order.status === 'shipped' && (
+                    {(order.status === 'shipped' || order.status === 'shipped_return') && (
                       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700">
-                        <button
-                          onClick={() => handleOpenConfirm(order)}
-                          className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium shadow-md transition-colors"
-                        >
-                          Konfirmasi Terima Barang
-                        </button>
+                        {order.status === 'shipped_return' ? (
+                           <button
+                             onClick={async () => {
+                               const toastId = toast.loading('Menyelesaikan pesanan...');
+                               try {
+                                 const { error } = await supabase.from('orders').update({ status: 'completed' }).eq('id', order.id);
+                                 if (error) throw error;
+                                 toast.success('Pesanan selesai!', { id: toastId });
+                                 window.location.reload(); 
+                               } catch (err) {
+                                 toast.error('Gagal menyelesaikan pesanan', { id: toastId });
+                               }
+                             }}
+                             className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium shadow-md transition-colors"
+                           >
+                             Terima Retur & Selesaikan Pesanan
+                           </button>
+                        ) : (
+                           <button
+                             onClick={() => handleOpenConfirm(order)}
+                             className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium shadow-md transition-colors"
+                           >
+                             Konfirmasi Terima Barang
+                           </button>
+                        )}
                       </div>
                     )}
                   </div>
