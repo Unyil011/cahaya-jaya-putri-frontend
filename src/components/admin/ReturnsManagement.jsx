@@ -18,24 +18,49 @@ export default function ReturnsManagement({ isDarkMode }) {
     try {
       const { data, error } = await supabase
         .from('returns')
-        .select('*, orders(order_number, profiles(name, email)), order_items(item_name)')
+        .select('*, orders(id, order_number, profiles(name, email)), order_items(item_name, unit)')
         .order('created_at', { ascending: false });
         
       if (error) throw error;
       
-      const mapped = data.map(r => ({
-        id: r.id,
-        orderNumber: r.orders?.order_number,
-        clientName: r.orders?.profiles?.name || r.orders?.profiles?.email?.split('@')[0] || 'Unknown',
-        itemName: r.order_items?.item_name || r.order_item_id,
-        quantity: r.quantity,
-        reason: r.reason,
-        action: r.action,
-        status: r.status,
-        date: new Date(r.created_at).toLocaleDateString('id-ID')
-      }));
+      // Group by order ID to match JSX structure
+      const grouped = {};
+      data.forEach(r => {
+        const orderId = r.order_id || r.orders?.id || 'unknown';
+        if (!grouped[orderId]) {
+          grouped[orderId] = {
+            id: orderId, // using orderId as the group id
+            order: {
+              order_number: r.orders?.order_number,
+              profiles: {
+                name: r.orders?.profiles?.name || r.orders?.profiles?.email?.split('@')[0] || 'Unknown'
+              }
+            },
+            created_at: r.created_at,
+            status: r.status, // overall status
+            items: []
+          };
+        }
+        
+        grouped[orderId].items.push({
+          id: r.id,
+          order_detail: {
+            item_name: r.order_items?.item_name || r.order_item_id,
+            unit: r.unit || r.order_items?.unit || 'pcs'
+          },
+          qty_returned: r.quantity,
+          reason: r.reason,
+          action_preference: r.action,
+          status: r.status
+        });
+        
+        // Update overall status to pending if any item is pending
+        if (r.status === 'pending') {
+          grouped[orderId].status = 'pending';
+        }
+      });
       
-      setReturns(mapped);
+      setReturns(Object.values(grouped));
     } catch (error) {
       console.error(error);
       toast.error('Gagal memuat daftar retur');

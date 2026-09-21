@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { ShoppingCart, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Send, ShoppingBag, LogOut, Package, User, Moon, Sun, ChevronDown, History, Search, X, Filter } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -222,7 +222,7 @@ export default function ClientDashboard() {
         </div>
 
         <nav className="flex-1 space-y-2">
-          <NavItem icon={Plus} label="Buat Pesanan" isActive={currentView === 'create'} onClick={() => setCurrentView('create')} />
+          <NavItem icon={ShoppingCart} label="Buat Pesanan" isActive={currentView === 'create'} onClick={() => setCurrentView('create')} />
           <NavItem icon={Package} label="Pesanan Berjalan" isActive={currentView === 'active'} onClick={() => setCurrentView('active')} />
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
         </nav>

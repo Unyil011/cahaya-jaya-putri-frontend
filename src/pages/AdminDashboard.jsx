@@ -4,7 +4,7 @@ import ReturnsManagement from '../components/admin/ReturnsManagement';
 import InventoryManagement from '../components/admin/InventoryManagement';
 import ClientManagement from '../components/admin/ClientManagement';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X } from 'lucide-react';
+import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -284,11 +284,11 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="flex-1 space-y-2">
-          <NavItem icon={LayoutDashboard} label="Ringkasan" isActive={currentView === 'overview'} onClick={() => setCurrentView('overview')} />
-          <NavItem icon={FileText} label="Pesanan Masuk" isActive={currentView === 'incoming'} onClick={() => setCurrentView('incoming')} badge={activeOrdersCount} />
-          <NavItem icon={CheckCircle} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
-          <NavItem icon={PackageOpen} label="Manajemen Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} />
-          <NavItem icon={Archive} label="Data Barang" isActive={currentView === 'inventory'} onClick={() => setCurrentView('inventory')} />
+          <NavItem icon={Home} label="Beranda" isActive={currentView === 'overview'} onClick={() => setCurrentView('overview')} />
+          <NavItem icon={Inbox} label="Pesanan Masuk" isActive={currentView === 'incoming'} onClick={() => setCurrentView('incoming')} badge={activeOrdersCount} />
+          <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
+          <NavItem icon={Undo2} label="Manajemen Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} />
+          <NavItem icon={Boxes} label="Data Barang" isActive={currentView === 'inventory'} onClick={() => setCurrentView('inventory')} />
           <NavItem icon={Users} label="Kelola SPPG" isActive={currentView === 'clients'} onClick={() => setCurrentView('clients')} />
         </nav>
       </div>
