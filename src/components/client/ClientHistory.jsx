@@ -32,7 +32,7 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
         `)
         .eq('user_id', userData.id)
         .eq('is_deleted_by_client', false)
-        .in('status', ['completed', 'complained'])
+        .eq('status', 'completed')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
