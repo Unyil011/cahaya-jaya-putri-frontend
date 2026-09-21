@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -12,6 +12,16 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    const role = localStorage.getItem('authRole');
+    if (token && role) {
+      if (role === 'admin') navigate('/admin/dashboard');
+      else navigate('/client/dashboard');
+    }
+  }, [navigate]);
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
