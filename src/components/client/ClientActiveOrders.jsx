@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PackageOpen, CheckCircle, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const prevOrdersRef = useRef([]);
   
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [returnItems, setReturnItems] = useState({});
@@ -62,7 +63,23 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
         }))
       }));
 
-      setOrders(formattedOrders);
+      
+      setOrders(prev => {
+        // Compare new data with prev data to show toasts
+        if (!showLoading) {
+           formattedOrders.forEach(newOrder => {
+              const oldOrder = prev.find(o => o.id === newOrder.id);
+              if (oldOrder && oldOrder.status === 'pending' && newOrder.status === 'priced') {
+                 toast.success('Admin telah memberikan harga untuk pesanan ' + newOrder.orderNumber + '!', { duration: 6000, icon: '💰' });
+              }
+              if (oldOrder && oldOrder.status === 'complained' && newOrder.status === 'shipped_return') {
+                 toast.success('Retur pesanan ' + newOrder.orderNumber + ' telah diproses Admin. Silakan periksa.', { duration: 6000, icon: '🔄' });
+              }
+           });
+        }
+        return formattedOrders;
+      });
+
     } catch (error) {
       console.error(error);
       if (showLoading) toast.error('Gagal memuat pesanan berjalan');
@@ -77,6 +94,8 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
       case 'priced': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">Harga Ditetapkan</span>;
       case 'processing': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 border border-pink-200 dark:border-pink-800/50">Sedang Disiapkan</span>;
       case 'shipped': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200 dark:border-purple-800/50">Sedang Dikirim</span>;
+      case 'shipped_return': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200 dark:border-orange-800/50">Menunggu Konfirmasi</span>;
+      case 'complained': return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50">Dikomplain</span>;
       default: return <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">Unknown</span>;
     }
   };
@@ -87,6 +106,8 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
       processing: 'bg-pink-100 text-pink-600 dark:bg-pink-900/40 dark:text-pink-400',
       priced: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400',
       shipped: 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400',
+      shipped_return: 'bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400',
+      complained: 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400',
     };
     return colors[status] || 'bg-gray-100 text-gray-500';
   };

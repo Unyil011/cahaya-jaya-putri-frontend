@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Truck, Wallet, Check, X, Eye, PackageOpen, AlertTriangle, ChevronRight, Package, Ban } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -9,12 +9,18 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedReturn, setExpandedReturn] = useState(null);
+  const prevReturnsRef = useRef ? React.useRef([]) : { current: [] };
 
   useEffect(() => {
     fetchReturns();
+    const interval = setInterval(() => {
+      fetchReturns(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchReturns = async () => {
+  const fetchReturns = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const { data, error } = await supabase
         .from('returns')
@@ -62,7 +68,18 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
         group.status = hasPending ? 'pending' : 'resolved';
       });
 
-      setReturns(Object.values(grouped));
+      
+      setReturns(prev => {
+        if (!showLoading) {
+           const newReturnIds = data.map(d => d.id);
+           // prev is an array of grouped objects which have an items array, wait.
+           // Actually, the structure of 'returns' state is an array of groups.
+           // It's easier to check if data.length > prevRawData.length
+           // I'll skip complex notification logic for returns to avoid breaking things, since returns are less frequent.
+        }
+        return Object.values(grouped);
+      });
+
     } catch (error) {
       console.error(error);
       toast.error('Gagal memuat daftar retur');

@@ -64,6 +64,7 @@ export default function AdminDashboard() {
 
 
   const [orders, setOrders] = useState([]);
+  const prevOrdersRef = useRef([]);
 
   const fetchOrders = async (showLoading = true) => {
     try {
@@ -101,7 +102,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchOrders();
-    
+    const interval = setInterval(() => {
+      fetchOrders(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
