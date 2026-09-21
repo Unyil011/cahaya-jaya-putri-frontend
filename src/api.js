@@ -24,15 +24,6 @@ api.interceptors.request.use(
     }
 );
 
-// Add a response interceptor to handle 401 Unauthorized
 
-            localStorage.removeItem('authRole');
-            localStorage.removeItem('user');
-            // Redirect to login page
-            window.location.href = '/';
-        }
-        return Promise.reject(error);
-    }
-);
 
 export default api;
