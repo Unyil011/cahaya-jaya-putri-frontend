@@ -69,7 +69,7 @@ export default function AdminDashboard() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*, profiles ( name ), order_items (*)')
+        .select('*, profiles ( name ), order_items (*), returns (*)')
         .eq('is_deleted_by_admin', false)
         .order('created_at', { ascending: false });
       
@@ -88,9 +88,10 @@ export default function AdminDashboard() {
           itemName: i.item_name,
           quantity: i.quantity,
           unit: i.unit,
-          hpp: i.hpp,
-          sellingPrice: i.selling_price
-        }))
+          sellingPrice: i.selling_price,
+          inventoryId: i.inventory_id
+        })),
+        returns: o.returns
       }));
       setOrders(formatted);
     } catch (e) {

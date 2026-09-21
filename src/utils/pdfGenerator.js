@@ -112,9 +112,37 @@ export const generateInvoicePDF = (order, type) => {
   const tableRows = [];
   let grandTotal = 0;
 
-  const items = order.items || [];
   
+  let items = JSON.parse(JSON.stringify(order.items || []));
+  let hasReturnNotes = false;
+  
+  if (order.returns && order.returns.length > 0) {
+    const replacedReturns = order.returns.filter(r => r.status === 'replaced');
+    const refundedReturns = order.returns.filter(r => r.status === 'refunded');
+
+    if (!isInvoice && replacedReturns.length > 0) {
+      items = replacedReturns.map(r => ({
+        itemName: r.item_name || 'Item',
+        quantity: r.quantity,
+        unit: r.unit || 'pcs'
+      }));
+      hasReturnNotes = true;
+    } else {
+      if (refundedReturns.length > 0) {
+        refundedReturns.forEach(ret => {
+          const existingItem = items.find(i => i.itemName === ret.item_name || i.item_name === ret.item_name);
+          if (existingItem) {
+            existingItem.quantity = Math.max(0, parseFloat(existingItem.quantity) - parseFloat(ret.quantity));
+          }
+        });
+        items = items.filter(i => parseFloat(i.quantity) > 0);
+        hasReturnNotes = true;
+      }
+    }
+  }
+
   items.forEach((item, index) => {
+
     if (isInvoice) {
       const price = parseFloat(item.sellingPrice || item.selling_price) || 0;
       const qty = parseFloat(item.quantity) || 0;
@@ -206,7 +234,7 @@ export const generateInvoicePDF = (order, type) => {
     // Surat Jalan Footer
     doc.setFontSize(8);
     doc.setFont('helvetica', 'italic');
-    const footerMsg = '* Mohon dicek kembali barang yang diterima. Barang yang sudah diterima dengan baik tidak dapat ditukar atau dikembalikan tanpa konfirmasi maksimal 1x24 jam.';
+    const footerMsg = hasReturnNotes ? '* PENTING: Surat Jalan ini merupakan pengiriman barang pengganti atau barang revisi atas proses komplain/retur sebelumnya.' : '* Mohon dicek kembali barang yang diterima. Barang yang sudah diterima dengan baik tidak dapat ditukar atau dikembalikan tanpa konfirmasi maksimal 1x24 jam.';
     const splitMsg = doc.splitTextToSize(footerMsg, pageWidth - 28);
     doc.text(splitMsg, 14, finalY + 5);
     
