@@ -18,7 +18,8 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
     try {
       const { data, error } = await supabase
         .from('returns')
-        .select('*, orders(id, order_number, profiles(name, email)), order_items(item_name, unit)')
+        .select('*, orders!inner(id, order_number, profiles(name, email)), order_items(item_name, unit)')
+        .eq('orders.status', 'complained')
         .order('created_at', { ascending: false });
         
       if (error) throw error;
