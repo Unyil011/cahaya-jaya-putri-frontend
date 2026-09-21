@@ -477,6 +477,7 @@ toast.success('Laporan berhasil diunduh!', { id: toastId });
                         </div>
                         <a 
                           href={selectedOrderDetails.paymentProofUrl} 
+                          download={`Bukti Pembayaran ${selectedOrderDetails.orderNumber}.jpg`}
                           target="_blank" 
                           rel="noreferrer"
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-sm transition-colors whitespace-nowrap"

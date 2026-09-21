@@ -266,6 +266,7 @@ export default function HistoryOrders({ filteredOrders, setOrders, orders, setSe
                     <img src={proofModalOrder.paymentProofUrl} alt="Bukti Pembayaran" className="max-h-64 object-contain" />
                     <a
                       href={proofModalOrder.paymentProofUrl}
+                      download={`Bukti Pembayaran ${proofModalOrder.orderNumber}.jpg`}
                       target="_blank"
                       rel="noreferrer"
                       className="absolute top-2 right-2 p-2 bg-white/90 rounded-lg shadow-sm text-gray-700 hover:text-mbg-blue-600 transition-colors"
