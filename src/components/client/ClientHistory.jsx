@@ -10,6 +10,8 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState([]);
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, isBulk: false, id: null });
 
   useEffect(() => {
@@ -165,46 +167,44 @@ toast.success('Laporan berhasil diunduh!', { id: toastId });
     }
   };
 
-  const handleUploadPaymentProof = async (e) => {
+  const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+    setPreviewFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const submitPaymentProof = async () => {
+    if (!previewFile) return;
     const toastId = toast.loading('Mengunggah bukti pembayaran...');
     try {
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${selectedOrderDetails.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `public/${fileName}`;
+      // Create Base64 string directly to avoid bucket creation issues
+      const reader = new FileReader();
+      reader.readAsDataURL(previewFile);
+      reader.onload = async () => {
+        const base64String = reader.result;
+        
+        // Update order in database directly with base64
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({ 
+            payment_proof_url: base64String,
+            payment_status: 'Menunggu Konfirmasi'
+          })
+          .eq('id', selectedOrderDetails.id);
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('payment_proofs')
-        .upload(filePath, file);
+        if (updateError) throw updateError;
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('payment_proofs')
-        .getPublicUrl(filePath);
-
-      // Update order in database
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ 
-          payment_proof_url: publicUrl,
-          payment_status: 'Menunggu Konfirmasi'
-        })
-        .eq('id', selectedOrderDetails.id);
-
-      if (updateError) throw updateError;
-
-      // Update local state
-      const updatedOrder = { ...selectedOrderDetails, paymentProofUrl: publicUrl, paymentStatus: 'Menunggu Konfirmasi' };
-      setSelectedOrderDetails(updatedOrder);
-      setOrders(orders.map(o => o.id === updatedOrder.id ? { ...o, paymentStatus: 'Menunggu Konfirmasi' } : o));
-
-      toast.success('Bukti pembayaran berhasil diunggah!', { id: toastId });
+        // Update local state
+        const updatedOrder = { ...selectedOrderDetails, paymentProofUrl: base64String, paymentStatus: 'Menunggu Konfirmasi' };
+        setSelectedOrderDetails(updatedOrder);
+        setOrders(orders.map(o => o.id === updatedOrder.id ? { ...o, paymentProofUrl: base64String, paymentStatus: 'Menunggu Konfirmasi' } : o));
+        
+        setPreviewFile(null);
+        setPreviewUrl(null);
+        toast.success('Bukti pembayaran berhasil diunggah!', { id: toastId });
+      };
+      reader.onerror = (error) => { throw error; };
     } catch (error) {
       console.error(error);
       toast.error('Gagal mengunggah bukti pembayaran.', { id: toastId });
