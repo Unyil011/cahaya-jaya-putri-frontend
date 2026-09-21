@@ -97,27 +97,27 @@ const InventoryManagement = () => {
   const handleUpdateStockSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
-    // Validasi
-    const invalidItems = updateStockItems.filter(item => !item.inventory_id);
-    if (invalidItems.length > 0) {
-      toast.error('Pilih barang dari saran yang muncul untuk semua baris!');
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       
-for (const item of updateStockItems) {
-  const inv = inventory.find(i => i.id === item.id);
-  await supabase.from('inventory').update({ stock: parseFloat(inv.stock) + parseFloat(item.quantity) }).eq('id', item.id);
-}
-      toast.success('Stok berhasil ditambahkan');
-      setIsUpdateStockModalOpen(false);
-      setUpdateStockItems([{ id: 1, inventory_id: '', search_name: '', quantity: '' }]);
+      for (const row of stockRows) {
+        if (!row.id || row.quantity === '') continue;
+        const item = inventories.find(inv => inv.id === row.id);
+        if (!item) continue;
+        
+        let qty = parseFloat(row.quantity);
+        if (row.type === 'kurang') qty = -qty;
+        
+        const { error } = await supabase.from('inventory').update({ stock: item.stock + qty }).eq('id', item.id);
+        if (error) throw error;
+      }
+      
+      handleCloseModal();
       fetchInventories();
+      toast.success('Stok berhasil diperbarui');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Gagal menambahkan stok');
+      console.error(err);
+      toast.error('Gagal memperbarui stok');
     } finally {
       setIsSubmitting(false);
     }
@@ -129,15 +129,22 @@ for (const item of updateStockItems) {
 
     try {
       setIsSubmitting(true);
+      let error;
       if (currentInventory) {
-        await supabase.from('inventory').update({ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }).eq('id', currentInventory.id);
+        const result = await supabase.from('inventory').update({ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }).eq('id', currentInventory.id);
+        error = result.error;
       } else {
-        await supabase.from('inventory').insert([{ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }]);
+        const result = await supabase.from('inventory').insert([{ item_name: formData.itemName, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }]);
+        error = result.error;
       }
+      if (error) throw error;
+      
       handleCloseModal();
       fetchInventories();
+      toast.success('Data berhasil disimpan');
     } catch (err) {
-      setError(err.response?.data?.message || 'Terjadi kesalahan saat menyimpan data');
+      console.error(err);
+      toast.error(err.message || 'Terjadi kesalahan saat menyimpan data');
     } finally {
       setIsSubmitting(false);
     }
