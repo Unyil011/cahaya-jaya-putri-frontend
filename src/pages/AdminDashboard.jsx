@@ -212,6 +212,7 @@ export default function AdminDashboard() {
       shipped: <span className="px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800">Dikirim</span>,
       completed: <span className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 rounded-full text-xs font-bold border border-green-200 dark:border-green-800">Selesai</span>,
       complained: <span className="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 rounded-full text-xs font-bold border border-red-200 dark:border-red-800">Dikomplain</span>,
+      shipped_return: <span className="px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400 rounded-full text-xs font-bold border border-orange-200 dark:border-orange-800">Menunggu Konfirmasi Klien</span>,
     };
     return badges[status] || <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold border border-gray-200">Unknown</span>;
   };
@@ -233,7 +234,7 @@ export default function AdminDashboard() {
   const clientOptions = ['Semua', ...new Set(orders.map(o => o.clientName))];
 
   const filteredOrders = orders.filter(order => {
-    if (currentView === 'incoming' && order.status === 'completed') return false;
+    if (currentView === 'incoming' && (order.status === 'completed' || order.status === 'shipped_return')) return false;
     if (currentView === 'history' && order.status !== 'completed') return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();

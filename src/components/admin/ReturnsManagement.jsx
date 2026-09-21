@@ -101,7 +101,7 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
         .eq('status', 'pending');
         
       if (!pendingErr && pendingReturns.length === 0) {
-         await supabase.from('orders').update({ status: 'completed' }).eq('id', orderId);
+         await supabase.from('orders').update({ status: 'shipped_return' }).eq('id', orderId);
          if (fetchOrders) fetchOrders(); // Sync AdminDashboard
       }
       
