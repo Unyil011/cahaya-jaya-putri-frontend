@@ -107,9 +107,9 @@ const InventoryManagement = () => {
     try {
       setIsSubmitting(true);
       
-      for (const row of stockRows) {
-        if (!row.id || row.quantity === '') continue;
-        const item = inventories.find(inv => inv.id === row.id);
+      for (const row of updateStockItems) {
+        if (!row.inventory_id || row.quantity === '') continue;
+        const item = inventories.find(inv => inv.id === row.inventory_id);
         if (!item) continue;
         
         let qty = parseFloat(row.quantity);
