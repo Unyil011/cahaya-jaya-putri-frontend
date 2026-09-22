@@ -85,7 +85,7 @@ const InventoryManagement = () => {
   };
 
   const handleStockAutocomplete = (id, val) => {
-    const matched = inventories.find(inv => inv.name.toLowerCase() === val.toLowerCase());
+    const matched = inventories.find(inv => (inv.item_name || '').toLowerCase() === val.toLowerCase());
     setUpdateStockItems(updateStockItems.map(item => 
       item.id === id ? { ...item, search_name: val, inventory_id: matched ? matched.id : '' } : item
     ));
@@ -421,22 +421,22 @@ const InventoryManagement = () => {
                           />
                           {item.isFocused && item.search_name && item.search_name.length > 0 && (
                             <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                              {inventories.filter(inv => inv.name.toLowerCase().includes(item.search_name.toLowerCase())).map(inv => (
+                              {inventories.filter(inv => (inv.item_name || '').toLowerCase().includes(item.search_name.toLowerCase())).map(inv => (
                                 <button
                                   key={inv.id}
                                   type="button"
                                   onClick={() => {
-                                    handleStockChange(item.id, 'search_name', inv.name);
+                                    handleStockChange(item.id, 'search_name', inv.item_name);
                                     handleStockChange(item.id, 'inventory_id', inv.id);
                                     handleStockChange(item.id, 'isFocused', false);
                                   }}
                                   className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 last:border-0"
                                 >
-                                  <div className="font-medium">{inv.name}</div>
+                                  <div className="font-medium">{inv.item_name}</div>
                                   <div className="text-xs text-gray-500">Sisa Stok: {inv.stock} {inv.unit}</div>
                                 </button>
                               ))}
-                              {inventories.filter(inv => inv.name.toLowerCase().includes(item.search_name.toLowerCase())).length === 0 && (
+                              {inventories.filter(inv => (inv.item_name || '').toLowerCase().includes(item.search_name.toLowerCase())).length === 0 && (
                                 <div className="px-4 py-3 text-sm text-gray-500 text-center">Barang tidak ditemukan</div>
                               )}
                             </div>
