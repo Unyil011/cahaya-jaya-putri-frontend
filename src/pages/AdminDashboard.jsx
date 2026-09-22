@@ -494,9 +494,9 @@ export default function AdminDashboard() {
             ) : currentView === 'returns' ? (
               <ReturnsManagement isDarkMode={isDarkMode} fetchOrders={fetchOrders} />
             ) : currentView === 'inventory' ? (
-              <InventoryManagement isDarkMode={isDarkMode} />
+              <InventoryManagement isDarkMode={isDarkMode} showConfirm={showConfirm} />
             ) : (
-              <ClientManagement isDarkMode={isDarkMode} />
+              <ClientManagement isDarkMode={isDarkMode} showConfirm={showConfirm} />
             )}
           </div>
 
