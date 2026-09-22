@@ -93,6 +93,7 @@ export default function AdminDashboard() {
           quantity: i.quantity,
           unit: i.unit,
           sellingPrice: i.selling_price,
+          hpp: i.hpp,
           inventoryId: i.inventory_id
         })),
         returns: o.returns
@@ -242,6 +243,31 @@ export default function AdminDashboard() {
     return colors[status] || 'bg-gray-100 text-gray-500';
   };
 
+  
+  const [pendingReturnsCount, setPendingReturnsCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPendingReturns = async () => {
+      const { data, error } = await supabase.from('returns').select('*').eq('status', 'pending');
+      if (!error && data) {
+        setPendingReturnsCount(data.length);
+      }
+    };
+    fetchPendingReturns();
+    
+    // Subscribe to changes in returns table to update badge live
+    const subscription = supabase
+      .channel('public:returns')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'returns' }, payload => {
+        fetchPendingReturns();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
+
   const activeOrdersCount = orders.filter(o => o.status !== 'completed' && o.status !== 'shipped_return').length;
 
   const clientOptions = ['Semua', ...new Set(orders.map(o => o.clientName))];
@@ -302,7 +328,7 @@ export default function AdminDashboard() {
           <NavItem icon={Home} label="Beranda" isActive={currentView === 'overview'} onClick={() => setCurrentView('overview')} />
           <NavItem icon={Inbox} label="Pesanan Masuk" isActive={currentView === 'incoming'} onClick={() => setCurrentView('incoming')} badge={activeOrdersCount} />
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
-          <NavItem icon={Undo2} label="Manajemen Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} />
+          <NavItem icon={Undo2} label="Manajemen Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} badge={pendingReturnsCount} />
           <NavItem icon={Boxes} label="Data Barang" isActive={currentView === 'inventory'} onClick={() => setCurrentView('inventory')} />
           <NavItem icon={Users} label="Kelola SPPG" isActive={currentView === 'clients'} onClick={() => setCurrentView('clients')} />
         </nav>

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
 import { AlertTriangle, TrendingUp, Package, CheckCircle, CreditCard, Clock, Bell } from 'lucide-react';
-import api from '../../api';
+import { supabase } from '../../supabaseClient';
 
 export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
   const [lowStockItems, setLowStockItems] = useState([]);
@@ -15,16 +15,17 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
   const fetchDashboardData = async () => {
     try {
       const [invRes, retRes] = await Promise.all([
-        api.get('/inventories'),
-        api.get('/returns')
+        supabase.from('inventory').select('*'),
+        supabase.from('returns').select('*')
       ]);
-      // Filter barang yang stoknya di bawah 10
-      const lowStock = invRes.data.filter(item => parseFloat(item.stock) < 10);
-      setLowStockItems(lowStock);
-
-      // Filter retur yang berstatus pending
-      const pendingCount = retRes.data.filter(r => r.status === 'pending').length;
-      setPendingReturns(pendingCount);
+      if (invRes.data) {
+        const lowStock = invRes.data.filter(item => parseFloat(item.stock) < 10).map(i => ({...i, name: i.item_name}));
+        setLowStockItems(lowStock);
+      }
+      if (retRes.data) {
+        const pendingCount = retRes.data.filter(r => r.status === 'pending').length;
+        setPendingReturns(pendingCount);
+      }
     } catch (err) {
       console.error('Failed to fetch dashboard data', err);
     }
@@ -32,19 +33,41 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
 
   // Kalkulasi KPI
   const kpi = useMemo(() => {
-    const activeOrders = filteredOrders.filter(o => o.status !== 'completed').length;
+    const activeOrders = filteredOrders.filter(o => o.status !== 'completed' && o.status !== 'shipped_return').length;
     
     // Total Revenue (Hanya dari pesanan completed)
     const revenue = filteredOrders
       .filter(o => o.status === 'completed')
       .reduce((acc, order) => acc + parseFloat(order.totalAmount || 0), 0);
+
+    // Keuntungan Bersih (Profit) = Harga Jual - HPP
+    const netProfit = filteredOrders
+      .filter(o => o.status === 'completed')
+      .reduce((acc, order) => {
+        const orderProfit = (order.items || []).reduce((sum, item) => sum + ((parseFloat(item.sellingPrice || 0) - parseFloat(item.hpp || 0)) * parseFloat(item.quantity || 0)), 0);
+        return acc + orderProfit;
+      }, 0);
       
     // Total Piutang (Pesanan selesai tapi belum lunas)
     const unpaid = filteredOrders
       .filter(o => o.status === 'completed' && o.paymentStatus !== 'Lunas')
       .reduce((acc, order) => acc + parseFloat(order.totalAmount || 0), 0);
 
-    return { activeOrders, revenue, unpaid };
+    return { activeOrders, revenue, netProfit, unpaid };
+  }, [filteredOrders]);
+
+  const topSppgData = useMemo(() => {
+    const sppgTotals = {};
+    filteredOrders.forEach(o => {
+      if (o.status === 'completed') {
+        if (!sppgTotals[o.clientName]) sppgTotals[o.clientName] = 0;
+        sppgTotals[o.clientName] += 1;
+      }
+    });
+    return Object.keys(sppgTotals)
+      .map(name => ({ name, value: sppgTotals[name] }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
   }, [filteredOrders]);
 
   // Data untuk Grafik Harian (Area Chart)
@@ -112,7 +135,7 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pendapatan Selesai</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pendapatan Kotor</p>
               <h3 className="text-2xl font-black text-green-600 dark:text-green-400 mt-1">Rp {kpi.revenue.toLocaleString('id-ID')}</h3>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
@@ -124,11 +147,11 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tagihan Belum Lunas</p>
-              <h3 className="text-2xl font-black text-orange-600 dark:text-orange-400 mt-1">Rp {kpi.unpaid.toLocaleString('id-ID')}</h3>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Keuntungan Bersih</p>
+              <h3 className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">Rp {kpi.netProfit.toLocaleString('id-ID')}</h3>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
-              <CreditCard className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <TrendingUp className="w-6 h-6" />
             </div>
           </div>
         </motion.div>
@@ -136,11 +159,11 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Retur Menunggu</p>
-              <h3 className="text-3xl font-black text-red-600 dark:text-red-400 mt-1">{pendingReturns}</h3>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tagihan Belum Lunas</p>
+              <h3 className="text-2xl font-black text-orange-600 dark:text-orange-400 mt-1">Rp {kpi.unpaid.toLocaleString('id-ID')}</h3>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
-              <AlertTriangle className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
+              <CreditCard className="w-6 h-6" />
             </div>
           </div>
         </motion.div>
