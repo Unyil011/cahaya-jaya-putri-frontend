@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from './ConfirmModal';
 import { Package, Plus, Edit2, Trash2, X, Check, Search, AlertCircle } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 
@@ -157,14 +158,20 @@ const InventoryManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Yakin ingin menghapus barang ini dari stok?')) {
-      try {
-        await supabase.from('inventory').delete().eq('id', id);
-        fetchInventories();
-      } catch (err) {
-        setError('Gagal menghapus barang');
-      }
+  const handleDeleteClick = (id) => {
+    setDeleteConfirm({ show: true, id });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await supabase.from('inventory').delete().eq('id', deleteConfirm.id);
+      fetchInventories();
+      toast.success('Barang berhasil dihapus');
+    } catch (err) {
+      setError('Gagal menghapus barang');
+      toast.error('Gagal menghapus barang');
+    } finally {
+      setDeleteConfirm({ show: false, id: null });
     }
   };
 
@@ -268,7 +275,7 @@ const InventoryManagement = () => {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => handleDeleteClick(item.id)}
                           className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title="Hapus"
                         >
@@ -500,6 +507,13 @@ const InventoryManagement = () => {
           </div>
         )}
       </AnimatePresence>
+      <ConfirmModal 
+        isOpen={deleteConfirm.show}
+        title="Hapus Barang"
+        message="Yakin ingin menghapus barang ini dari stok? Tindakan ini tidak dapat dibatalkan."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm({ show: false, id: null })}
+      />
     </div>
   );
 };
