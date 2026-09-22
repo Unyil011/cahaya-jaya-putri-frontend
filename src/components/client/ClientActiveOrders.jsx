@@ -483,6 +483,24 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
           </div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={cancelConfirmDialog.isOpen}
+        title="Batalkan Pesanan"
+        message="Apakah Anda yakin ingin membatalkan pesanan ini? Aksi ini tidak dapat dikembalikan."
+        onConfirm={async () => {
+          const toastId = toast.loading('Membatalkan pesanan...');
+          try {
+            const { error } = await supabase.from('orders').delete().eq('id', cancelConfirmDialog.orderId);
+            if (error) throw error;
+            toast.success('Pesanan berhasil dibatalkan!', { id: toastId });
+            fetchOrders();
+          } catch (err) {
+            toast.error('Gagal membatalkan pesanan', { id: toastId });
+          }
+        }}
+        onCancel={() => setCancelConfirmDialog({ isOpen: false, orderId: null })}
+      />
     </div>
   );
 }
