@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PackageOpen, CheckCircle, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../admin/ConfirmModal';
 import { supabase } from '../../supabaseClient';
 
 export default function ClientActiveOrders({ searchQuery = '' }) {
@@ -12,6 +13,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
   const prevOrdersRef = useRef([]);
   
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [cancelConfirmDialog, setCancelConfirmDialog] = useState({ isOpen: false, orderId: null });
   const [returnItems, setReturnItems] = useState({});
   const [returnNotes, setReturnNotes] = useState('');
 
@@ -308,19 +310,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
                     {order.status === 'pending' && (
                       <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                         <button
-                          onClick={async () => {
-                            if (window.confirm('Yakin ingin membatalkan pesanan ini?')) {
-                              const toastId = toast.loading('Membatalkan pesanan...');
-                              try {
-                                const { error } = await supabase.from('orders').delete().eq('id', order.id);
-                                if (error) throw error;
-                                toast.success('Pesanan berhasil dibatalkan!', { id: toastId });
-                                fetchOrders();
-                              } catch (err) {
-                                toast.error('Gagal membatalkan pesanan', { id: toastId });
-                              }
-                            }
-                          }}
+                          onClick={() => setCancelConfirmDialog({ isOpen: true, orderId: order.id })}
                           className="w-full py-3 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 rounded-xl font-medium shadow-sm transition-colors border border-red-100 dark:border-red-800"
                         >
                           Batalkan Pesanan
