@@ -35,8 +35,9 @@ export default function IncomingOrders({
   useEffect(() => {
     const fetchInventories = async () => {
       try {
-        const res = await api.get('/inventories');
-        setInventories(res.data);
+        const { data, error } = await supabase.from('inventory').select('*').order('item_name');
+        if (error) throw error;
+        setInventories(data || []);
       } catch (err) {
         console.error('Failed to fetch inventories', err);
       }
@@ -137,7 +138,7 @@ export default function IncomingOrders({
                                   <option value="">- Non Stok -</option>
                                   {inventories.map(inv => (
                                     <option key={inv.id} value={inv.id}>
-                                      {inv.name} (Sisa: {inv.stock})
+                                      {inv.item_name} (Sisa: {inv.stock})
                                     </option>
                                   ))}
                                 </select>
