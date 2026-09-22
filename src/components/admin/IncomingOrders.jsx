@@ -126,8 +126,8 @@ export default function IncomingOrders({
                                     handlePriceChange(order.id, item.id, 'inventoryId', invId);
                                     if (invId) {
                                       const inv = inventories.find(i => i.id == invId);
-                                      if (inv && inv.default_price) {
-                                        handlePriceChange(order.id, item.id, 'hpp', inv.default_price);
+                                      if (inv && inv.hpp) {
+                                        handlePriceChange(order.id, item.id, 'hpp', inv.hpp);
                                       }
                                     }
                                   }}

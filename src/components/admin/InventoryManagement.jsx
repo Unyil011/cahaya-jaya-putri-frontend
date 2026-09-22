@@ -23,7 +23,7 @@ const InventoryManagement = () => {
     name: '',
     stock: 0,
     unit: 'Pcs',
-    default_price: ''
+    hpp: ''
   });
 
   const fetchInventories = async () => {
@@ -50,11 +50,11 @@ const InventoryManagement = () => {
         name: inventory.item_name,
         stock: inventory.stock,
         unit: inventory.unit,
-        default_price: inventory.default_price || ''
+        hpp: inventory.hpp || ''
       });
     } else {
       setCurrentInventory(null);
-      setFormData({ name: '', stock: 0, unit: 'Pcs', default_price: '' });
+      setFormData({ name: '', stock: 0, unit: 'Pcs', hpp: '' });
     }
     setIsModalOpen(true);
   };
@@ -131,10 +131,10 @@ const InventoryManagement = () => {
       setIsSubmitting(true);
       let error;
       if (currentInventory) {
-        const result = await supabase.from('inventory').update({ item_name: formData.name, stock: formData.stock, unit: formData.unit, default_price: formData.default_price }).eq('id', currentInventory.id);
+        const result = await supabase.from('inventory').update({ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp || null }).eq('id', currentInventory.id);
         error = result.error;
       } else {
-        const result = await supabase.from('inventory').insert([{ item_name: formData.name, stock: formData.stock, unit: formData.unit, default_price: formData.default_price }]);
+        const result = await supabase.from('inventory').insert([{ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp || null }]);
         error = result.error;
       }
       if (error) throw error;
@@ -249,7 +249,7 @@ const InventoryManagement = () => {
                       </span>
                     </td>
                     <td className="p-4 text-right text-gray-600 dark:text-gray-300">
-                      {item.default_price ? `Rp ${parseInt(item.default_price).toLocaleString('id-ID')}` : '-'}
+                      {item.hpp ? `Rp ${parseInt(item.hpp).toLocaleString('id-ID')}` : '-'}
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-2">
@@ -352,8 +352,8 @@ const InventoryManagement = () => {
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                     <input
                       type="number"
-                      value={formData.default_price}
-                      onChange={(e) => setFormData({ ...formData, default_price: e.target.value })}
+                      value={formData.hpp}
+                      onChange={(e) => setFormData({ ...formData, hpp: e.target.value })}
                       className="w-full pl-12 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 dark:text-white transition-all"
                       placeholder="0"
                     />
