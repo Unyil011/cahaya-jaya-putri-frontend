@@ -47,7 +47,7 @@ const InventoryManagement = () => {
     if (inventory) {
       setCurrentInventory(inventory);
       setFormData({
-        name: inventory.name,
+        name: inventory.item_name,
         stock: inventory.stock,
         unit: inventory.unit,
         default_price: inventory.default_price || ''
@@ -162,7 +162,7 @@ const InventoryManagement = () => {
   };
 
   const filteredInventories = inventories.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.item_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
