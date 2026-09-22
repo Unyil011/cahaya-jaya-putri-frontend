@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PackageOpen, CheckCircle, AlertTriangle, FileText, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ConfirmModal from '../admin/ConfirmModal';
+import ClientEditOrderModal from './ClientEditOrderModal';
 import { supabase } from '../../supabaseClient';
 
 export default function ClientActiveOrders({ searchQuery = '' }) {
@@ -14,6 +15,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
   
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [cancelConfirmDialog, setCancelConfirmDialog] = useState({ isOpen: false, orderId: null });
+  const [editModalOrder, setEditModalOrder] = useState(null);
   const [returnItems, setReturnItems] = useState({});
   const [returnNotes, setReturnNotes] = useState('');
 
@@ -308,12 +310,18 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
                     )}
 
                     {order.status === 'pending' && (
-                      <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+                      <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700 flex gap-3">
+                        <button
+                          onClick={() => setEditModalOrder(order)}
+                          className="flex-1 py-3 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-400 rounded-xl font-medium shadow-sm transition-colors border border-blue-100 dark:border-blue-800"
+                        >
+                          Ubah Pesanan
+                        </button>
                         <button
                           onClick={() => setCancelConfirmDialog({ isOpen: true, orderId: order.id })}
-                          className="w-full py-3 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 rounded-xl font-medium shadow-sm transition-colors border border-red-100 dark:border-red-800"
+                          className="flex-1 py-3 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 rounded-xl font-medium shadow-sm transition-colors border border-red-100 dark:border-red-800"
                         >
-                          Batalkan Pesanan
+                          Batalkan
                         </button>
                       </div>
                     )}
@@ -484,6 +492,12 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
         )}
       </AnimatePresence>
 
+      <ClientEditOrderModal 
+        selectedOrderDetails={editModalOrder}
+        setSelectedOrderDetails={setEditModalOrder}
+        fetchOrders={fetchOrders}
+      />
+      
       <ConfirmModal
         isOpen={cancelConfirmDialog.isOpen}
         title="Batalkan Pesanan"
