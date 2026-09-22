@@ -45,11 +45,13 @@ export default function Register() {
         console.warn('Profile insert error:', profileError);
       }
 
-      toast.success('Akun SPPG berhasil dibuat! Silakan login.', { id: toastId });
+      toast.success('Akun SPPG berhasil dibuat! Sesi berpindah, silakan Login kembali sebagai Admin.', { id: toastId, duration: 5000 });
       
-      // Ensure we are signed out immediately so they have to login properly
+      // Supabase automatically logs in the newly created user.
+      // To prevent the Admin from accidentally acting as the new Client, we must sign out.
       await supabase.auth.signOut();
-      navigate('/admin/dashboard');
+      localStorage.removeItem('authRole'); // Clear custom role
+      navigate('/'); // Go back to login page (which is at root "/")
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Gagal mendaftar', { id: toastId });
@@ -70,7 +72,7 @@ export default function Register() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="glass p-8 rounded-3xl shadow-xl border border-white/40">
-          <Link to="/login" className="inline-flex items-center text-sm font-medium text-mbg-blue-600 hover:text-mbg-blue-800 mb-6 transition-colors">
+          <Link to="/" className="inline-flex items-center text-sm font-medium text-mbg-blue-600 hover:text-mbg-blue-800 mb-6 transition-colors">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Kembali ke Login
           </Link>

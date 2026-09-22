@@ -17,7 +17,7 @@ export default function ResetPassword() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.error('Sesi tidak valid atau telah kedaluwarsa. Silakan ulangi proses lupa password.');
-        navigate('/login');
+        navigate('/');
       }
     };
     checkSession();
@@ -45,7 +45,7 @@ export default function ResetPassword() {
       
       // Sign out immediately so they have to login with new password (optional, but good practice)
       await supabase.auth.signOut();
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Gagal mengubah password', { id: toastId });
@@ -66,7 +66,7 @@ export default function ResetPassword() {
         className="relative z-10 w-full max-w-md"
       >
         <div className="glass p-8 rounded-3xl shadow-xl border border-white/40">
-          <Link to="/login" className="inline-flex items-center text-sm font-medium text-mbg-blue-600 hover:text-mbg-blue-800 mb-6 transition-colors">
+          <Link to="/" className="inline-flex items-center text-sm font-medium text-mbg-blue-600 hover:text-mbg-blue-800 mb-6 transition-colors">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Batal & Kembali ke Login
           </Link>
