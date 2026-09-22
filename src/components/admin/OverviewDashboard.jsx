@@ -61,7 +61,7 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
     filteredOrders.forEach(o => {
       if (o.status === 'completed') {
         if (!sppgTotals[o.clientName]) sppgTotals[o.clientName] = 0;
-        sppgTotals[o.clientName] += 1;
+        sppgTotals[o.clientName] += parseFloat(o.totalAmount || 0);
       }
     });
     return Object.keys(sppgTotals)
@@ -169,9 +169,9 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Main Chart */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="lg:col-span-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Statistik Pendapatan</h3>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -191,14 +191,52 @@ export default function OverviewDashboard({ filteredOrders, isDarkMode }) {
             </ResponsiveContainer>
           </div>
         </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        {/* Donut Chart - SPPG Terlaris */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80 flex flex-col">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-blue-500" /> SPPG Paling Aktif (Pesanan Terbanyak)
+          </h3>
+          <div className="flex-1 w-full flex justify-center items-center h-64 relative">
+            {topSppgData.length === 0 ? (
+              <div className="text-center text-gray-500">Belum ada data pesanan selesai.</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={topSppgData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {topSppgData.map((entry, index) => {
+                      const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                      return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                    })}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: isDarkMode ? '#1e293b' : 'white', color: isDarkMode ? 'white' : 'black' }}
+                    formatter={(value) => [`Rp ${value.toLocaleString('id-ID')}`, 'Total Omset']}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </motion.div>
 
         {/* Alerts & Low Stock */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80 flex flex-col">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-6 shadow-xl border border-gray-200 dark:border-slate-700/80 flex flex-col">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Bell className="w-5 h-5 text-orange-500" /> Peringatan Stok
           </h3>
           
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+          <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-64">
             {lowStockItems.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2 opacity-50" />
