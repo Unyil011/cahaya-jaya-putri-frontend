@@ -94,6 +94,13 @@ const InventoryManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
 
+  
+  const handleStockSelect = (id, inv) => {
+    setUpdateStockItems(items => items.map(item => 
+      item.id === id ? { ...item, search_name: inv.item_name, inventory_id: inv.id, isFocused: false } : item
+    ));
+  };
+
   const handleUpdateStockSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -425,11 +432,7 @@ const InventoryManagement = () => {
                                 <button
                                   key={inv.id}
                                   type="button"
-                                  onMouseDown={(e) => { e.preventDefault();
-                                    handleStockChange(item.id, 'search_name', inv.item_name);
-                                    handleStockChange(item.id, 'inventory_id', inv.id);
-                                    handleStockChange(item.id, 'isFocused', false);
-                                  }}
+                                  onMouseDown={() => handleStockSelect(item.id, inv)}
                                   className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 last:border-0"
                                 >
                                   <div className="font-medium">{inv.item_name}</div>
