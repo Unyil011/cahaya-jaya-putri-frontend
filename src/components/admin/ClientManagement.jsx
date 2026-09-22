@@ -52,10 +52,7 @@ export default function ClientManagement({ isDarkMode }) {
       setIsSubmitting(true);
       if (currentClient) {
         await supabase.from('profiles').update({ name: formData.name }).eq('id', currentClient.id);
-        toast.success('Data SPPG berhasil diperbarui');
-      } else {
-        toast.error('Menambah klien baru harus melalui halaman registrasi (Supabase Auth).');
-        toast.success('SPPG berhasil ditambahkan');
+        toast.success('Nama SPPG berhasil diperbarui');
       }
       handleCloseModal();
       fetchClients();
@@ -193,7 +190,7 @@ export default function ClientManagement({ isDarkMode }) {
             >
               <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {currentClient ? 'Edit SPPG' : 'Tambah SPPG Baru'}
+                  'Edit Nama SPPG'
                 </h3>
                 <button
                   onClick={handleCloseModal}
