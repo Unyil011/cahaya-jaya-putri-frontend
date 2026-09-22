@@ -138,14 +138,14 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
     const toastId = toast.loading('Menghapus...');
     try {
       if (isBulk || Array.isArray(id)) {
-        const { error } = await supabase.from('orders').delete().in('id', selectedIds);
+        const { error } = await supabase.from('orders').update({ is_deleted_by_client: true }).in('id', selectedIds);
         if (error) throw error;
         
         setOrders(orders.filter(o => !selectedIds.includes(o.id)));
         setSelectedIds([]);
         toast.success(`${selectedIds.length} pesanan dihapus.`, { id: toastId });
       } else {
-        const { error } = await supabase.from('orders').delete().eq('id', id);
+        const { error } = await supabase.from('orders').update({ is_deleted_by_client: true }).eq('id', id);
         if (error) throw error;
         
         setOrders(orders.filter(o => o.id !== id));

@@ -207,9 +207,15 @@ export default function HistoryOrders({ filteredOrders, setOrders, orders, setSe
                           showConfirm(
                             'Hapus Riwayat',
                             'Hapus riwayat pesanan ini secara permanen?',
-                            () => {
-                              setOrders(orders.filter(o => o.id !== order.id));
-                              toast.success('Pesanan dihapus dari riwayat.');
+                            async () => {
+                              const toastId = toast.loading('Menghapus...');
+                              try {
+                                await supabase.from('orders').update({ is_deleted_by_admin: true }).eq('id', order.id);
+                                setOrders(orders.filter(o => o.id !== order.id));
+                                toast.success('Pesanan dihapus dari riwayat.', { id: toastId });
+                              } catch (e) {
+                                toast.error('Gagal menghapus pesanan.', { id: toastId });
+                              }
                             }
                           );
                         }}
