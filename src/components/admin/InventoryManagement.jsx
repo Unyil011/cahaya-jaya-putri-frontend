@@ -425,7 +425,7 @@ const InventoryManagement = () => {
                                 <button
                                   key={inv.id}
                                   type="button"
-                                  onClick={() => {
+                                  onMouseDown={(e) => { e.preventDefault();
                                     handleStockChange(item.id, 'search_name', inv.item_name);
                                     handleStockChange(item.id, 'inventory_id', inv.id);
                                     handleStockChange(item.id, 'isFocused', false);
