@@ -3,23 +3,36 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { supabase } from '../supabaseClient';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const handleReset = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) throw error;
+      
       setIsSent(true);
       toast.success('Link reset password telah dikirim ke email Anda!', {
         style: { background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)' },
       });
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Gagal mengirim email reset', {
+        style: { background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)' },
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
