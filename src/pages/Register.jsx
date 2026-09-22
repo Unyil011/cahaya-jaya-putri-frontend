@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -48,7 +49,7 @@ export default function Register() {
       
       // Ensure we are signed out immediately so they have to login properly
       await supabase.auth.signOut();
-      navigate('/login');
+      navigate('/admin/dashboard');
     } catch (error) {
       console.error(error);
       toast.error(error.message || 'Gagal mendaftar', { id: toastId });
@@ -85,7 +86,7 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-mbg-blue-900 mb-1">Nama SPPG</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                   <User className="h-5 w-5 text-mbg-blue-500" />
                 </div>
                 <input
@@ -102,7 +103,7 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-mbg-blue-900 mb-1">Email / Username</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                   <Mail className="h-5 w-5 text-mbg-blue-500" />
                 </div>
                 <input
@@ -119,18 +120,27 @@ export default function Register() {
             <div>
               <label className="block text-sm font-medium text-mbg-blue-900 mb-1">Password</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                   <Lock className="h-5 w-5 text-mbg-blue-500" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="block w-full pl-10 pr-3 py-3 border border-white/50 rounded-xl bg-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-mbg-blue-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-10 py-3 border border-white/50 rounded-xl bg-white/30 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-mbg-blue-500 focus:border-transparent transition-all relative z-0"
                   placeholder="Minimal 6 karakter"
                   required
                   minLength={6}
                 />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-mbg-blue-500 hover:text-mbg-blue-700 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
             </div>
 

@@ -131,10 +131,10 @@ const InventoryManagement = () => {
       setIsSubmitting(true);
       let error;
       if (currentInventory) {
-        const result = await supabase.from('inventory').update({ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }).eq('id', currentInventory.id);
+        const result = await supabase.from('inventory').update({ item_name: formData.name, stock: formData.stock, unit: formData.unit, default_price: formData.default_price }).eq('id', currentInventory.id);
         error = result.error;
       } else {
-        const result = await supabase.from('inventory').insert([{ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp, selling_price: formData.sellingPrice }]);
+        const result = await supabase.from('inventory').insert([{ item_name: formData.name, stock: formData.stock, unit: formData.unit, default_price: formData.default_price }]);
         error = result.error;
       }
       if (error) throw error;
