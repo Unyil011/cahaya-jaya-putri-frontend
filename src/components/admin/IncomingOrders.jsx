@@ -134,10 +134,10 @@ export default function IncomingOrders({
                                     }}
                                     onFocus={() => handlePriceChange(order.id, item.id, 'isSearchFocused', true)}
                                     onBlur={() => setTimeout(() => handlePriceChange(order.id, item.id, 'isSearchFocused', false), 200)}
-                                    className="w-32 md:w-48 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
+                                    className="w-48 md:w-64 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
                                   />
                                   {item.isSearchFocused && item.searchName && item.searchName.length > 0 && (
-                                    <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                    <div className="absolute z-50 min-w-[200px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                                       {inventories
                                         .filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase()))
                                         .map(inv => (
@@ -145,12 +145,15 @@ export default function IncomingOrders({
                                             key={inv.id}
                                             type="button"
                                             onMouseDown={() => {
-                                              handlePriceChange(order.id, item.id, 'inventoryId', inv.id);
-                                              handlePriceChange(order.id, item.id, 'searchName', inv.item_name);
-                                              handlePriceChange(order.id, item.id, 'isSearchFocused', false);
-                                              if (inv.hpp) {
-                                                handlePriceChange(order.id, item.id, 'hpp', inv.hpp);
+                                              const updates = {
+                                                inventoryId: inv.id,
+                                                searchName: inv.item_name,
+                                                isSearchFocused: false
+                                              };
+                                              if (inv.hpp !== undefined && inv.hpp !== null) {
+                                                updates.hpp = inv.hpp;
                                               }
+                                              handlePriceChange(order.id, item.id, updates);
                                             }}
                                             className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 last:border-0"
                                           >
