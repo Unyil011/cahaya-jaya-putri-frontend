@@ -11,17 +11,19 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  
   useEffect(() => {
-    // Check if the user is actually in a recovery session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('Sesi tidak valid atau telah kedaluwarsa. Silakan ulangi proses lupa password.');
-        navigate('/');
+    // Supabase automatically parses the URL hash (#access_token=...) and establishes a session.
+    // We listen to the auth state change to ensure it is processed, but we don't aggressively redirect
+    // because processing the hash can take a few milliseconds.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        console.log('Recovery mode active');
       }
-    };
-    checkSession();
-  }, [navigate]);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
 
   const handleReset = async (e) => {
     e.preventDefault();
