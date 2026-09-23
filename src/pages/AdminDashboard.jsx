@@ -158,19 +158,33 @@ export default function AdminDashboard() {
   }, []);
 
   const handlePriceChange = (orderId, itemId, field, value) => {
-    let numericValue = value;
-    if (field === 'sellingPrice' || field === 'hpp') {
-      numericValue = value.replace(/^0+(?=\d)/, '');
-      if (parseFloat(numericValue) < 0) numericValue = '0';
-    }
-    
     setOrders(prevOrders => prevOrders.map(order => {
       if (order.id === orderId) {
         return {
           ...order,
           items: order.items.map(item => {
             if (item.id === itemId) {
-              return { ...item, [field]: numericValue };
+              if (typeof field === 'object' && field !== null) {
+                let updatedItem = { ...item };
+                for (const [k, v] of Object.entries(field)) {
+                  let numVal = v;
+                  if (k === 'sellingPrice' || k === 'hpp') {
+                    const strVal = String(v);
+                    numVal = strVal.replace(/^0+(?=\d)/, '');
+                    if (parseFloat(numVal) < 0) numVal = '0';
+                  }
+                  updatedItem[k] = numVal;
+                }
+                return updatedItem;
+              } else {
+                let numericValue = value;
+                if (field === 'sellingPrice' || field === 'hpp') {
+                  const strValue = String(value);
+                  numericValue = strValue.replace(/^0+(?=\d)/, '');
+                  if (parseFloat(numericValue) < 0) numericValue = '0';
+                }
+                return { ...item, [field]: numericValue };
+              }
             }
             return item;
           })
