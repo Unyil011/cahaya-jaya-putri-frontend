@@ -46,7 +46,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
         `)
         .eq('user_id', userData.id)
         .neq('status', 'completed')
-        .neq('status', 'complained')
+        
         .order('created_at', { ascending: false });
 
       if (error) throw error;

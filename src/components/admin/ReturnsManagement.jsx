@@ -230,9 +230,9 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
                               {item.reason}
                             </td>
                             <td className="py-3 px-4">
-                              {item.action_preference === 'refunded' ? (
+                              {(item.action_preference || item.action) === 'refunded' ? (
                                 <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 rounded-md text-[10px] font-bold border border-purple-200 dark:border-purple-800/50">Potong Tagihan (Beli Darurat)</span>
-                              ) : item.action_preference === 'replaced' ? (
+                              ) : (item.action_preference || item.action) === 'replaced' ? (
                                 <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 rounded-md text-[10px] font-bold border border-blue-200 dark:border-blue-800/50">Kirim Ulang</span>
                               ) : (
                                 <span className="text-xs text-gray-400">-</span>
