@@ -137,7 +137,7 @@ export default function AdminDashboard() {
       if (parseFloat(numericValue) < 0) numericValue = '0';
     }
     
-    setOrders(orders.map(order => {
+    setOrders(prevOrders => prevOrders.map(order => {
       if (order.id === orderId) {
         return {
           ...order,
