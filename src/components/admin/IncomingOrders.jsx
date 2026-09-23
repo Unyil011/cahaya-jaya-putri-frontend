@@ -136,19 +136,8 @@ export default function IncomingOrders({
                                     onBlur={() => setTimeout(() => handlePriceChange(order.id, item.id, 'isSearchFocused', false), 200)}
                                     className="w-32 md:w-48 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
                                   />
-                                  {item.isSearchFocused && (
+                                  {item.isSearchFocused && item.searchName && item.searchName.length > 0 && (
                                     <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
-                                      <button
-                                        type="button"
-                                        onMouseDown={() => {
-                                          handlePriceChange(order.id, item.id, 'inventoryId', '');
-                                          handlePriceChange(order.id, item.id, 'searchName', '');
-                                          handlePriceChange(order.id, item.id, 'isSearchFocused', false);
-                                        }}
-                                        className="w-full text-left px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-700 border-b border-gray-100 dark:border-slate-700"
-                                      >
-                                        - Non Stok -
-                                      </button>
                                       {inventories
                                         .filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase()))
                                         .map(inv => (
