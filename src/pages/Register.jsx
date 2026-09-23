@@ -38,9 +38,7 @@ export default function Register() {
       // Also insert into profiles if there's no trigger. Let's do it just in case, though usually Supabase has a trigger.
       // Wait, let's just check if it needs manual insert. The previous code didn't do it. We'll trust the trigger.
       // If it fails, they will tell us. Actually, let's insert to profiles manually to be safe.
-      const { error: profileError } = await supabase.from('profiles').insert([
-        { id: data.user.id, name: formData.name, email: formData.email, role: 'client' }
-      ]);
+      const { error: profileError } = await supabase.from('profiles').upsert([{ id: data.user.id, name: formData.name, email: formData.email, role: 'client' }]);
       if (profileError) {
         console.warn('Profile insert error:', profileError);
       }

@@ -222,7 +222,7 @@ export default function ClientDashboard() {
           <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center bg-mbg-blue-600 text-white font-bold shrink-0 shadow-md shadow-mbg-blue-500/30">
             <span className="text-sm">MBG</span>
           </div>
-          <h2 className="text-xl font-bold truncate">SPPG {clientName}</h2>
+          <h2 className="text-xl font-bold truncate">SPPG {sppgName}</h2>
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -339,7 +339,7 @@ export default function ClientDashboard() {
                   <User className="w-4 h-4" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate max-w-[100px]">Hi, {clientName}</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-200 truncate max-w-[100px]">Hi, {profileName}</p>
                 </div>
                 <ChevronDown className="hidden md:block w-4 h-4 text-gray-400" />
               </motion.button>
