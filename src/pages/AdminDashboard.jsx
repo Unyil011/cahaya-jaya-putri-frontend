@@ -291,7 +291,7 @@ export default function AdminDashboard() {
     const fetchPendingReturns = async () => {
       const { data, error } = await supabase.from('returns').select('*').eq('status', 'pending');
       if (!error && data) {
-        setPendingReturnsCount(data.length);
+        setPendingReturnsCount(new Set(data.map(r => r.order_id)).size);
       }
     };
     fetchPendingReturns();
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
           <NavItem icon={Home} label="Beranda" isActive={currentView === 'overview'} onClick={() => setCurrentView('overview')} />
           <NavItem icon={Inbox} label="Pesanan Masuk" isActive={currentView === 'incoming'} onClick={() => setCurrentView('incoming')} badge={activeOrdersCount} />
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
-          <NavItem icon={Undo2} label="Manajemen Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} badge={pendingReturnsCount} />
+          <NavItem icon={Undo2} label="Ajuan Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} badge={pendingReturnsCount} />
           <NavItem icon={Boxes} label="Data Barang" isActive={currentView === 'inventory'} onClick={() => setCurrentView('inventory')} />
           <NavItem icon={Users} label="Kelola SPPG" isActive={currentView === 'clients'} onClick={() => setCurrentView('clients')} />
         </nav>

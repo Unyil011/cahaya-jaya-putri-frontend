@@ -58,7 +58,7 @@ export default function ReturnsManagement({ isDarkMode, fetchOrders }) {
           qty_returned: r.quantity,
           reason: r.reason,
           status: r.status,
-          action_preference: r.action_preference
+          action_preference: r.action_preference, action: r.action
         });
       });
       
