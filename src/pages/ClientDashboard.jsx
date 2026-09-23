@@ -14,8 +14,11 @@ export default function ClientDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem('user')) || {};
-  let rawClientName = user.name ? user.name : (user.email ? user.email.split('@')[0] : 'Client');
-  const clientName = rawClientName.charAt(0).toUpperCase() + rawClientName.slice(1).toLowerCase();
+  
+  
+    const sppgName = user.name ? user.name.charAt(0).toUpperCase() + user.name.slice(1) : 'Klien';
+  const emailPrefix = user.email ? user.email.split('@')[0] : 'Profil';
+  const profileName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase();
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
