@@ -201,10 +201,10 @@ const StockHistory = ({ setCurrentView }) => {
                 <th className="py-4 px-4 w-12 text-center">
                   <input type="checkbox" checked={selectedIds.length === updates.length && updates.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded text-mbg-blue-600" />
                 </th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Waktu Update</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Item Masuk</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Nilai Modal (HPP)</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Waktu Update</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Item Masuk</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Nilai Modal (HPP)</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
@@ -221,17 +221,17 @@ const StockHistory = ({ setCurrentView }) => {
                     <td className="py-3 px-4 text-center">
                       <input type="checkbox" checked={selectedIds.includes(update.id)} onChange={() => toggleSelect(update.id)} className="w-4 h-4 rounded text-mbg-blue-600" />
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {new Date(update.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric'})}
                       </div>
                       <div className="text-xs text-gray-500">{new Date(update.created_at).toLocaleTimeString('id-ID')}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
                       <div className="font-medium">{update.stock_update_items.length} Macam Barang</div>
                       <div className="text-xs text-gray-500">{itemSummary}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right">
+                    <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">
                       {formatCurrency(totalNilai)}
                     </td>
                     <td className="py-3 px-4 text-right">
@@ -408,19 +408,19 @@ const StockHistory = ({ setCurrentView }) => {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-gray-50 dark:bg-slate-800/80 sticky top-0">
                   <tr>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase">Nama Barang</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-center">Qty Masuk</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-right">HPP / Unit</th>
-                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-right">Total</th>
+                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">Nama Barang</th>
+                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-center whitespace-nowrap">Qty Masuk</th>
+                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-right whitespace-nowrap">HPP / Unit</th>
+                    <th className="py-3 px-6 text-xs font-semibold text-gray-500 uppercase text-right whitespace-nowrap">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
                   {selectedDetails.stock_update_items.map((item, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
-                      <td className="py-3 px-6 text-sm font-medium text-gray-900 dark:text-white">{item.inventory?.item_name || 'Item Dihapus'}</td>
-                      <td className="py-3 px-6 text-sm text-gray-600 dark:text-gray-300 text-center">{item.qty_added} {item.inventory?.unit || 'Pcs'}</td>
-                      <td className="py-3 px-6 text-sm text-gray-600 dark:text-gray-300 text-right">{formatCurrency(item.hpp)}</td>
-                      <td className="py-3 px-6 text-sm font-bold text-gray-900 dark:text-white text-right">{formatCurrency(item.qty_added * item.hpp)}</td>
+                      <td className="py-3 px-6 text-sm font-medium text-gray-900 dark:text-white whitespace-nowrap">{item.inventory?.item_name || 'Item Dihapus'}</td>
+                      <td className="py-3 px-6 text-sm text-gray-600 dark:text-gray-300 text-center whitespace-nowrap">{item.qty_added} {item.inventory?.unit || 'Pcs'}</td>
+                      <td className="py-3 px-6 text-sm text-gray-600 dark:text-gray-300 text-right whitespace-nowrap">{formatCurrency(item.hpp)}</td>
+                      <td className="py-3 px-6 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatCurrency(item.qty_added * item.hpp)}</td>
                     </tr>
                   ))}
                 </tbody>
