@@ -130,7 +130,7 @@ const StockHistory = ({ setCurrentView }) => {
     const toastId = toast.loading('Menghapus riwayat...');
     try {
       await supabase.from('stock_updates').delete().eq('id', id);
-      toast.success('Riwayat berhasil dihapus, stok telah disesuaikan!', { id: toastId });
+      toast.success('Log riwayat berhasil dihapus!', { id: toastId });
       fetchHistory();
       setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
     } catch (err) {
@@ -391,7 +391,7 @@ const StockHistory = ({ setCurrentView }) => {
       <ConfirmModal 
         isOpen={deleteConfirm.show}
         title="Hapus Riwayat"
-        message="Yakin ingin menghapus riwayat ini? Peringatan: Stok barang saat ini akan dikurangi secara otomatis!"
+        message="Yakin ingin menghapus riwayat ini dari log histori? (Catatan: Stok asli di gudang tidak akan berubah/berkurang)."
         onConfirm={() => {
           handleDelete(deleteConfirm.id);
           setDeleteConfirm({ show: false, id: null });
@@ -402,7 +402,7 @@ const StockHistory = ({ setCurrentView }) => {
       <ConfirmModal 
         isOpen={bulkDeleteConfirm}
         title="Hapus Massal Riwayat"
-        message={"Yakin ingin menghapus " + selectedIds.length + " riwayat sekaligus? Peringatan: Stok barang saat ini akan disesuaikan otomatis untuk semua riwayat yang dihapus!"}
+        message={"Yakin ingin menghapus " + selectedIds.length + " riwayat sekaligus dari log histori? (Stok gudang tidak akan berubah)."}
         onConfirm={handleBulkDelete}
         onCancel={() => setBulkDeleteConfirm(false)}
       />

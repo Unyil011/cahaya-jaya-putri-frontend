@@ -25,27 +25,17 @@ CREATE POLICY "Allow all on stock_update_items" ON public.stock_update_items FOR
 
 -- Create trigger function
 CREATE OR REPLACE FUNCTION public.handle_stock_update()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
     IF TG_OP = 'INSERT' THEN
         UPDATE public.inventory 
         SET stock = stock + NEW.qty_added, hpp = NEW.hpp
         WHERE id = NEW.inventory_id;
         RETURN NEW;
-    ELSIF TG_OP = 'DELETE' THEN
-        UPDATE public.inventory 
-        SET stock = stock - OLD.qty_added
-        WHERE id = OLD.inventory_id;
-        RETURN OLD;
-    ELSIF TG_OP = 'UPDATE' THEN
-        UPDATE public.inventory 
-        SET stock = stock - OLD.qty_added + NEW.qty_added, hpp = NEW.hpp
-        WHERE id = NEW.inventory_id;
-        RETURN NEW;
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create trigger
 DROP TRIGGER IF EXISTS on_stock_update ON public.stock_update_items;
