@@ -4,6 +4,7 @@ import OverviewDashboard from '../components/admin/OverviewDashboard';
 import ReturnsManagement from '../components/admin/ReturnsManagement';
 import InventoryManagement from '../components/admin/InventoryManagement';
 import ClientManagement from '../components/admin/ClientManagement';
+import StockHistory from '../components/admin/StockHistory';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -391,7 +392,9 @@ export default function AdminDashboard() {
                 <><History className="w-5 h-5 text-green-600 md:hidden" /> Riwayat Pesanan</>
               ) : currentView === 'returns' ? (
                 <><Undo2 className="w-5 h-5 text-orange-600 md:hidden" /> Manajemen Retur</>
-              ) : currentView === 'inventory' ? (
+              ) : currentView === 'stock_updates' ? (
+              <StockHistory isDarkMode={isDarkMode} showConfirm={showConfirm} setCurrentView={setCurrentView} />
+            ) : currentView === 'inventory' ? (
                 <><Boxes className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Data Barang</>
               ) : (
                 <><Users className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Kelola SPPG</>
@@ -561,7 +564,7 @@ export default function AdminDashboard() {
             ) : currentView === 'returns' ? (
               <ReturnsManagement isDarkMode={isDarkMode} fetchOrders={fetchOrders} />
             ) : currentView === 'inventory' ? (
-              <InventoryManagement isDarkMode={isDarkMode} showConfirm={showConfirm} />
+              <InventoryManagement isDarkMode={isDarkMode} showConfirm={showConfirm} setCurrentView={setCurrentView} />
             ) : (
               <ClientManagement isDarkMode={isDarkMode} showConfirm={showConfirm} />
             )}

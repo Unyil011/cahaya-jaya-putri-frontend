@@ -6,7 +6,7 @@ import { supabase } from '../../supabaseClient';
 
 import toast from 'react-hot-toast';
 
-const InventoryManagement = () => {
+const InventoryManagement = ({ setCurrentView }) => {
   const [inventories, setInventories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,6 +27,11 @@ const InventoryManagement = () => {
     hpp: ''
   });
 
+  
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount || 0);
+  };
+  
   const fetchInventories = async () => {
     try {
       setLoading(true);
@@ -175,6 +180,11 @@ const InventoryManagement = () => {
     }
   };
 
+  
+  const totalMacam = inventories.length;
+  const totalFisik = inventories.reduce((sum, item) => sum + (item.stock > 0 ? item.stock : 0), 0);
+  const totalModal = inventories.reduce((sum, item) => sum + (item.stock > 0 ? item.stock * (item.hpp || 0) : 0), 0);
+
   const filteredInventories = inventories.filter(item => 
     (item.item_name || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -198,7 +208,7 @@ const InventoryManagement = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setIsUpdateStockModalOpen(true)}
+            onClick={() => setCurrentView('stock_updates')}
             className="flex-1 sm:flex-none flex justify-center items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors shadow-sm text-xs sm:text-sm md:text-base"
           >
             <Package className="w-4 h-4 sm:w-5 sm:h-5" />
