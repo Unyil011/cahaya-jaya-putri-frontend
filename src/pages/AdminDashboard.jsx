@@ -6,7 +6,7 @@ import InventoryManagement from '../components/admin/InventoryManagement';
 import ClientManagement from '../components/admin/ClientManagement';
 import StockHistory from '../components/admin/StockHistory';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X } from 'lucide-react';
+import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X , PackagePlus} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
