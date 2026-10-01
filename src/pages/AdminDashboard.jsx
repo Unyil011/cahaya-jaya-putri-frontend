@@ -402,7 +402,7 @@ export default function AdminDashboard() {
               )}
             </h1>
             <p className="hidden md:block text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-0.5 transition-colors">
-              {currentView === 'overview' ? 'Ringkasan performa dan notifikasi penting.' : currentView === 'incoming' ? 'Kelola pesanan aktif dari SPPG, tentukan HPP & Harga Jual.' : currentView === 'history' ? 'Arsip pesanan SPPG yang sudah selesai.' : currentView === 'returns' ? 'Kelola komplain dan pengembalian barang dari SPPG.' : currentView === 'inventory' ? 'Kelola inventaris dan stok barang di gudang.' : 'Kelola akun SPPG.'}
+              {currentView === 'overview' ? 'Ringkasan performa dan notifikasi penting.' : currentView === 'incoming' ? 'Kelola pesanan aktif dari SPPG, tentukan HPP & Harga Jual.' : currentView === 'history' ? 'Arsip pesanan SPPG yang sudah selesai.' : currentView === 'returns' ? 'Kelola komplain dan pengembalian barang dari SPPG.' : currentView === 'inventory' ? 'Kelola inventaris dan stok barang di gudang.' : currentView === 'stock_updates' ? 'Kelola barang masuk dan pantau riwayat pergerakan stok.' : 'Kelola akun SPPG.'}
             </p>
           </div>
 

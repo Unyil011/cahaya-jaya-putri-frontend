@@ -181,19 +181,6 @@ const StockHistory = ({ setCurrentView }) => {
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setCurrentView('inventory')} className="p-2 bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 border border-gray-200 dark:border-slate-700 shadow-sm transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <PackagePlus className="w-6 h-6 text-mbg-blue-500" />
-              Update Stok & Histori
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola barang masuk dan pantau riwayat pergerakan stok.</p>
-          </div>
-        </div>
-        
         <div className="flex items-center gap-2">
           {selectedIds.length > 0 && (
              <button onClick={() => setBulkDeleteConfirm(true)} className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-medium flex items-center gap-2 hover:bg-red-200">
