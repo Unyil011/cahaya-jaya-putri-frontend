@@ -372,7 +372,7 @@ export default function AdminDashboard() {
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
           <NavItem icon={Undo2} label="Ajuan Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} badge={pendingReturnsCount} />
           <NavItem icon={Boxes} label="Data Barang" isActive={currentView === 'inventory'} onClick={() => setCurrentView('inventory')} />
-          <NavItem icon={History} label="Riwayat Stok" isActive={currentView === 'stock_updates'} onClick={() => setCurrentView('stock_updates')} />
+          <NavItem icon={PackagePlus} label="Update Stok" isActive={currentView === 'stock_updates'} onClick={() => setCurrentView('stock_updates')} />
           <NavItem icon={Users} label="Kelola SPPG" isActive={currentView === 'clients'} onClick={() => setCurrentView('clients')} />
         </nav>
       </div>
@@ -394,7 +394,7 @@ export default function AdminDashboard() {
               ) : currentView === 'returns' ? (
                 <><Undo2 className="w-5 h-5 text-orange-600 md:hidden" /> Manajemen Retur</>
               ) : currentView === 'stock_updates' ? (
-                <><History className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Riwayat Stok</>
+                <><PackagePlus className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Update Stok</>
               ) : currentView === 'inventory' ? (
                 <><Boxes className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Data Barang</>
               ) : (
