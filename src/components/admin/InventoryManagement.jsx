@@ -277,7 +277,7 @@ const InventoryManagement = ({ setCurrentView }) => {
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-center">Stok Tersedia</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Harga Pokok (HPP)</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Harga Jual Standar</th>
-                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Subtotal Modal (HPP × Stok)</th>
+                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Subtotal Modal</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-center">Aksi</th>
               </tr>
             </thead>

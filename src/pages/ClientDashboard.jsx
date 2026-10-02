@@ -157,8 +157,11 @@ export default function ClientDashboard() {
     try {
       let finalDate = null;
       if (customDate) {
-        const timePart = customTime ? customTime : '00:00';
-        finalDate = new Date(`${customDate}T${timePart}:00`).toISOString();
+        const now = new Date();
+        const [y, m, d] = customDate.split('-').map(Number);
+        // Tanggal dipilih klien, jam & menit otomatis realtime saat pesanan dikirim
+        const combinedDate = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+        finalDate = combinedDate.toISOString();
       }
 
       const dateObj = customDate ? new Date(customDate) : new Date();
@@ -407,32 +410,18 @@ export default function ClientDashboard() {
               >
                 <form onSubmit={handleSubmit}>
 
-                  {/* Custom Date Time Selection */}
-                  <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        Tanggal Pesanan (Opsional)
-                      </label>
-                      <input 
-                        type="date"
-                        value={customDate}
-                        onChange={(e) => setCustomDate(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 bg-white dark:bg-slate-700 dark:text-white"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Kosongkan jika untuk hari ini.</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        Waktu Pesanan (Opsional)
-                      </label>
-                      <input 
-                        type="time"
-                        value={customTime}
-                        onChange={(e) => setCustomTime(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 bg-white dark:bg-slate-700 dark:text-white"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Hanya berlaku jika tanggal diisi.</p>
-                    </div>
+                  {/* Custom Date Selection */}
+                  <div className="mb-6 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                      Tanggal Pesanan (Opsional)
+                    </label>
+                    <input 
+                      type="date"
+                      value={customDate}
+                      onChange={(e) => setCustomDate(e.target.value)}
+                      className="w-full sm:w-72 px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 bg-white dark:bg-slate-700 dark:text-white"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Kosongkan jika untuk hari ini. Jam pesanan akan otomatis tercatat sesuai waktu pengiriman (realtime).</p>
                   </div>
 
                   {/* Dynamic Rows Container */}
