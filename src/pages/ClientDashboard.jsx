@@ -39,6 +39,29 @@ export default function ClientDashboard() {
   const [inventories, setInventories] = useState([]);
   const [customDate, setCustomDate] = useState('');
   const [customTime, setCustomTime] = useState('');
+  const [activeOrdersCount, setActiveOrdersCount] = useState(0);
+
+  const fetchActiveCount = async () => {
+    if (!user?.id) return;
+    try {
+      const { count, error } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .neq('status', 'completed');
+      if (!error && count !== null) {
+        setActiveOrdersCount(count);
+      }
+    } catch (err) {
+      console.error('Failed to fetch active count:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveCount();
+    const interval = setInterval(fetchActiveCount, 5000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   useEffect(() => {
     const fetchInventories = async () => {
@@ -193,6 +216,7 @@ export default function ClientDashboard() {
       if (itemsError) throw itemsError;
 
       toast.success('Pesanan berhasil dikirim ke Supplier!');
+      fetchActiveCount();
       setItems([{ id: 1, itemName: '', quantity: '', unit: '' }]);
       setCustomDate('');
       setCustomTime('');
@@ -216,16 +240,23 @@ export default function ClientDashboard() {
   };
 
   // Nav Item Component for Sidebar
-  const NavItem = ({ icon: Icon, label, isActive, onClick }) => (
+  const NavItem = ({ icon: Icon, label, isActive, onClick, badge }) => (
     <button
       onClick={onClick}
-      className={`w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive
+      className={`w-full text-left flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all ${isActive
           ? 'bg-mbg-blue-500/10 text-mbg-blue-600 dark:bg-mbg-blue-500/20 dark:text-mbg-blue-400 border border-mbg-blue-200 dark:border-mbg-blue-500/30'
           : 'text-gray-600 hover:bg-white/40 dark:text-gray-400 dark:hover:bg-slate-800 border border-transparent'
         }`}
     >
-      <Icon className="w-5 h-5" />
-      {label}
+      <div className="flex items-center gap-3">
+        <Icon className="w-5 h-5" />
+        <span>{label}</span>
+      </div>
+      {badge !== undefined && badge > 0 && (
+        <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+          {badge}
+        </span>
+      )}
     </button>
   );
 
@@ -246,7 +277,7 @@ export default function ClientDashboard() {
 
         <nav className="flex-1 space-y-2">
           <NavItem icon={ShoppingCart} label="Buat Pesanan" isActive={currentView === 'create'} onClick={() => setCurrentView('create')} />
-          <NavItem icon={Package} label="Pesanan Berjalan" isActive={currentView === 'active'} onClick={() => setCurrentView('active')} />
+          <NavItem icon={Package} label="Pesanan Berjalan" isActive={currentView === 'active'} onClick={() => setCurrentView('active')} badge={activeOrdersCount} />
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
         </nav>
       </div>
@@ -571,6 +602,11 @@ export default function ClientDashboard() {
           className={`relative p-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${currentView === 'active' ? 'text-mbg-blue-600 bg-mbg-blue-50 dark:bg-mbg-blue-900/30' : 'text-gray-500'}`}
         >
           <Package className="w-6 h-6" />
+          {activeOrdersCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-slate-900">
+              {activeOrdersCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setCurrentView('history')}
