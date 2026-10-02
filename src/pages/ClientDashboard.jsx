@@ -155,13 +155,26 @@ export default function ClientDashboard() {
     
 
     try {
-      const date = new Date();
-      const dateString = date.toISOString().split('T')[0].replace(/-/g, '');
+      let finalDate = null;
+      if (customDate) {
+        const timePart = customTime ? customTime : '00:00';
+        finalDate = new Date(`${customDate}T${timePart}:00`).toISOString();
+      }
+
+      const dateObj = customDate ? new Date(customDate) : new Date();
+      const dateString = dateObj.toISOString().split('T')[0].replace(/-/g, '');
       const orderNumber = `ORD-${dateString}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
       
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .insert([{ user_id: user.id, order_number: orderNumber, status: 'pending', payment_status: 'Belum Lunas', total_amount: 0 }])
+        .insert([{ 
+          user_id: user.id, 
+          order_number: orderNumber, 
+          status: 'pending', 
+          payment_status: 'Belum Lunas', 
+          total_amount: 0,
+          custom_order_date: finalDate
+        }])
         .select().single();
 
       if (orderError) throw orderError;

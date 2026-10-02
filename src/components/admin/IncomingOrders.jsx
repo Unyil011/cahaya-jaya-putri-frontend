@@ -150,15 +150,22 @@ export default function IncomingOrders({
                                                 searchName: inv.item_name,
                                                 isSearchFocused: false
                                               };
-                                              if (inv.hpp !== undefined && inv.hpp !== null) {
-                                                updates.hpp = inv.hpp;
-                                              }
+                                              if (inv.hpp !== undefined && inv.hpp !== null && inv.hpp !== '') {
+                                                  updates.hpp = inv.hpp;
+                                                }
+                                                if (inv.selling_price !== undefined && inv.selling_price !== null && inv.selling_price !== '' && parseFloat(inv.selling_price) > 0) {
+                                                  updates.sellingPrice = inv.selling_price;
+                                                }
                                               handlePriceChange(order.id, item.id, updates);
                                             }}
                                             className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 last:border-0"
                                           >
                                             <div className="font-medium text-sm">{inv.item_name}</div>
-                                            <div className="text-[10px] text-gray-500">Sisa Stok: {inv.stock} {inv.unit}</div>
+                                            <div className="text-[10px] text-gray-500 flex flex-wrap gap-x-2">
+                                                <span>Stok: {inv.stock} {inv.unit}</span>
+                                                {inv.hpp ? <span>• HPP: Rp {parseInt(inv.hpp).toLocaleString('id-ID')}</span> : null}
+                                                {inv.selling_price ? <span className="text-pink-600 dark:text-pink-400 font-medium">• Jual: Rp {parseInt(inv.selling_price).toLocaleString('id-ID')}</span> : null}
+                                              </div>
                                           </button>
                                         ))
                                       }

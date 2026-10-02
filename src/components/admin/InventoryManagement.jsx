@@ -24,7 +24,8 @@ const InventoryManagement = ({ setCurrentView }) => {
     name: '',
     stock: 0,
     unit: 'Pcs',
-    hpp: ''
+    hpp: '',
+    sellingPrice: ''
   });
 
   
@@ -56,11 +57,12 @@ const InventoryManagement = ({ setCurrentView }) => {
         name: inventory.item_name,
         stock: inventory.stock,
         unit: inventory.unit,
-        hpp: inventory.hpp || ''
+        hpp: inventory.hpp !== null && inventory.hpp !== undefined ? inventory.hpp : '',
+        sellingPrice: inventory.selling_price !== null && inventory.selling_price !== undefined ? inventory.selling_price : ''
       });
     } else {
       setCurrentInventory(null);
-      setFormData({ name: '', stock: 0, unit: 'Pcs', hpp: '' });
+      setFormData({ name: '', stock: 0, unit: 'Pcs', hpp: '', sellingPrice: '' });
     }
     setIsModalOpen(true);
   };
@@ -143,11 +145,26 @@ const InventoryManagement = ({ setCurrentView }) => {
     try {
       setIsSubmitting(true);
       let error;
+      const parsedHpp = formData.hpp !== '' && !isNaN(formData.hpp) ? parseFloat(formData.hpp) : null;
+      const parsedSellingPrice = formData.sellingPrice !== '' && !isNaN(formData.sellingPrice) ? parseFloat(formData.sellingPrice) : null;
+
       if (currentInventory) {
-        const result = await supabase.from('inventory').update({ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp || null }).eq('id', currentInventory.id);
+        const result = await supabase.from('inventory').update({
+          item_name: formData.name,
+          stock: formData.stock,
+          unit: formData.unit,
+          hpp: parsedHpp,
+          selling_price: parsedSellingPrice
+        }).eq('id', currentInventory.id);
         error = result.error;
       } else {
-        const result = await supabase.from('inventory').insert([{ item_name: formData.name, stock: formData.stock, unit: formData.unit, hpp: formData.hpp || null }]);
+        const result = await supabase.from('inventory').insert([{
+          item_name: formData.name,
+          stock: formData.stock,
+          unit: formData.unit,
+          hpp: parsedHpp,
+          selling_price: parsedSellingPrice
+        }]);
         error = result.error;
       }
       if (error) throw error;
@@ -258,20 +275,22 @@ const InventoryManagement = ({ setCurrentView }) => {
                 <th className="p-4 font-semibold text-gray-900 dark:text-white w-16 text-center">No</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white">Nama Barang</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-center">Stok Tersedia</th>
-                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Harga Pokok (HPP) Standar</th>
+                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Harga Pokok (HPP)</th>
+                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Harga Jual Standar</th>
+                <th className="p-4 font-semibold text-gray-900 dark:text-white text-right">Subtotal Modal (HPP × Stok)</th>
                 <th className="p-4 font-semibold text-gray-900 dark:text-white text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="p-8 text-center text-gray-500 dark:text-gray-400">
                     Memuat data...
                   </td>
                 </tr>
               ) : filteredInventories.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan="7" className="p-8 text-center text-gray-500 dark:text-gray-400">
                     Belum ada data barang di gudang.
                   </td>
                 </tr>
@@ -290,7 +309,13 @@ const InventoryManagement = ({ setCurrentView }) => {
                       </span>
                     </td>
                     <td className="p-4 text-right text-gray-600 dark:text-gray-300">
-                      {item.hpp ? `Rp ${parseInt(item.hpp).toLocaleString('id-ID')}` : '-'}
+                      {item.hpp ? formatCurrency(item.hpp) : '-'}
+                    </td>
+                    <td className="p-4 text-right text-gray-600 dark:text-gray-300 font-medium">
+                      {item.selling_price ? formatCurrency(item.selling_price) : '-'}
+                    </td>
+                    <td className="p-4 text-right font-bold text-gray-900 dark:text-white">
+                      {item.hpp && item.stock ? formatCurrency(item.hpp * item.stock) : 'Rp 0'}
                     </td>
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-2">
@@ -385,19 +410,36 @@ const InventoryManagement = ({ setCurrentView }) => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Harga Pokok Standar (Opsional)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                    <input
-                      type="number"
-                      value={formData.hpp}
-                      onChange={(e) => setFormData({ ...formData, hpp: e.target.value })}
-                      className="w-full pl-12 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 dark:text-white transition-all"
-                      placeholder="0"
-                    />
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      HPP Standar (Modal)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
+                      <input
+                        type="number"
+                        value={formData.hpp}
+                        onChange={(e) => setFormData({ ...formData, hpp: e.target.value })}
+                        className="w-full pl-9 pr-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 dark:text-white transition-all text-sm"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Harga Jual Standar
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
+                      <input
+                        type="number"
+                        value={formData.sellingPrice}
+                        onChange={(e) => setFormData({ ...formData, sellingPrice: e.target.value })}
+                        className="w-full pl-9 pr-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-mbg-blue-500 dark:text-white transition-all text-sm"
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                 </div>
 
