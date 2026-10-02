@@ -32,6 +32,7 @@ export default function ClientHistory({ searchQuery = '', filterPayment = 'Semua
           payment_status,
           total_amount,
           created_at,
+          custom_order_date,
           order_items (*), returns (*)
         `)
         .eq('user_id', userData.id)

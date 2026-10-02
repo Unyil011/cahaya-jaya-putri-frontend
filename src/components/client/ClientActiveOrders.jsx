@@ -42,6 +42,7 @@ export default function ClientActiveOrders({ searchQuery = '' }) {
           payment_status,
           total_amount,
           created_at,
+          custom_order_date,
           order_items (*)
         `)
         .eq('user_id', userData.id)
