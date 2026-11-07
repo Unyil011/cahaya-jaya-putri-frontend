@@ -137,7 +137,7 @@ export default function IncomingOrders({
                                     className="w-48 md:w-64 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
                                   />
                                   {item.isSearchFocused && item.searchName && item.searchName.length > 0 && (
-                                    <div className="absolute z-50 min-w-[200px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                    <div className="absolute left-0 z-50 min-w-[260px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto flex flex-col whitespace-normal divide-y divide-gray-100 dark:divide-slate-700">
                                       {inventories
                                         .filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase()))
                                         .map(inv => (
@@ -158,19 +158,19 @@ export default function IncomingOrders({
                                                 }
                                               handlePriceChange(order.id, item.id, updates);
                                             }}
-                                            className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-700 last:border-0"
+                                            className="w-full block text-left px-3.5 py-2.5 hover:bg-pink-50/60 dark:hover:bg-slate-700/60 text-gray-900 dark:text-white transition-colors"
                                           >
-                                            <div className="font-medium text-sm">{inv.item_name}</div>
-                                            <div className="text-[10px] text-gray-500 flex flex-wrap gap-x-2">
-                                                <span>Stok: {inv.stock} {inv.unit}</span>
-                                                {inv.hpp ? <span>• HPP: Rp {parseInt(inv.hpp).toLocaleString('id-ID')}</span> : null}
-                                                {inv.selling_price ? <span className="text-pink-600 dark:text-pink-400 font-medium">• Jual: Rp {parseInt(inv.selling_price).toLocaleString('id-ID')}</span> : null}
-                                              </div>
+                                            <div className="font-semibold text-sm leading-tight text-gray-900 dark:text-white truncate">{inv.item_name}</div>
+                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                                              <span className="font-medium text-gray-600 dark:text-gray-300">Stok: {inv.stock} {inv.unit}</span>
+                                              {inv.hpp ? <span>• HPP: Rp {parseInt(inv.hpp).toLocaleString('id-ID')}</span> : null}
+                                              {inv.selling_price ? <span className="text-pink-600 dark:text-pink-400 font-semibold">• Jual: Rp {parseInt(inv.selling_price).toLocaleString('id-ID')}</span> : null}
+                                            </div>
                                           </button>
                                         ))
                                       }
                                       {inventories.filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase())).length === 0 && (
-                                        <div className="px-3 py-2 text-xs text-gray-500 text-center">Barang tidak ditemukan</div>
+                                        <div className="px-3 py-3 text-xs text-gray-500 text-center">Barang tidak ditemukan</div>
                                       )}
                                     </div>
                                   )}
