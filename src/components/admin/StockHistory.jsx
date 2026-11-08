@@ -195,14 +195,14 @@ const StockHistory = ({ setCurrentView }) => {
 
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex-1 overflow-hidden flex flex-col">
         <div className="overflow-x-auto flex-1">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-fixed min-w-[650px]">
             <thead>
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                 <th className="py-4 px-4 w-12 text-center">
                   <input type="checkbox" checked={selectedIds.length === updates.length && updates.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded text-mbg-blue-600" />
                 </th>
                 <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-44">Waktu Update</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider max-w-xs md:max-w-sm">Item Masuk</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider w-64 md:w-80">Item Masuk</th>
                 <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap w-44">Nilai Modal (HPP)</th>
                 <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap w-24">Aksi</th>
               </tr>
@@ -214,7 +214,10 @@ const StockHistory = ({ setCurrentView }) => {
                 <tr><td colSpan="5" className="py-8 text-center text-gray-500">Belum ada riwayat update stok.</td></tr>
               ) : updates.map(update => {
                 const totalNilai = update.stock_update_items.reduce((sum, item) => sum + (item.qty_added * item.hpp), 0);
-                const itemSummary = update.stock_update_items.slice(0,2).map(i => i.inventory?.item_name).join(', ') + (update.stock_update_items.length > 2 ? ' ...' : '');
+                const items = update.stock_update_items || [];
+                const firstItemName = items[0]?.inventory?.item_name || 'Barang';
+                const extraCount = items.length - 1;
+                const fullItemSummary = items.map(i => `${i.inventory?.item_name || 'Barang'} (${i.qty_added} ${i.inventory?.unit || 'Pcs'})`).join(', ');
                 
                 return (
                   <tr key={update.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50">
@@ -227,14 +230,25 @@ const StockHistory = ({ setCurrentView }) => {
                       </div>
                       <div className="text-xs text-gray-500">{new Date(update.created_at).toLocaleTimeString('id-ID')}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs md:max-w-sm">
-                      <div className="font-semibold text-gray-900 dark:text-white">{update.stock_update_items.length} Macam Barang</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" title={itemSummary}>{itemSummary}</div>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300">
+                      <div className="max-w-[240px] md:max-w-[280px]">
+                        <div className="font-semibold text-gray-900 dark:text-white">
+                          {items.length} Macam Barang
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" title={fullItemSummary}>
+                          {firstItemName}
+                          {extraCount > 0 && (
+                            <span className="text-mbg-blue-600 dark:text-mbg-blue-400 font-medium ml-1">
+                              (+{extraCount} lainnya)
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">
                       {formatCurrency(totalNilai)}
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => { setSelectedDetails(update); setIsDetailsModalOpen(true); }} className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Lihat Detail">
                           <Eye className="w-4 h-4" />
