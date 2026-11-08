@@ -201,10 +201,10 @@ const StockHistory = ({ setCurrentView }) => {
                 <th className="py-4 px-4 w-12 text-center">
                   <input type="checkbox" checked={selectedIds.length === updates.length && updates.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded text-mbg-blue-600" />
                 </th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Waktu Update</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">Item Masuk</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Nilai Modal (HPP)</th>
-                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap">Aksi</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap w-44">Waktu Update</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider max-w-xs md:max-w-sm">Item Masuk</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap w-44">Nilai Modal (HPP)</th>
+                <th className="py-4 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right whitespace-nowrap w-24">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-700/50">
@@ -227,9 +227,9 @@ const StockHistory = ({ setCurrentView }) => {
                       </div>
                       <div className="text-xs text-gray-500">{new Date(update.created_at).toLocaleTimeString('id-ID')}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">
-                      <div className="font-medium">{update.stock_update_items.length} Macam Barang</div>
-                      <div className="text-xs text-gray-500">{itemSummary}</div>
+                    <td className="py-3 px-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs md:max-w-sm">
+                      <div className="font-semibold text-gray-900 dark:text-white">{update.stock_update_items.length} Macam Barang</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" title={itemSummary}>{itemSummary}</div>
                     </td>
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">
                       {formatCurrency(totalNilai)}
