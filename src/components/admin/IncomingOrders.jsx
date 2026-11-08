@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, ChevronRight, CheckCircle, Printer, FileText } from 'lucide-react';
+import { Package, ChevronRight, CheckCircle, Printer, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../supabaseClient';
 
@@ -120,7 +120,7 @@ export default function IncomingOrders({
                                 <span className="font-bold text-gray-900 dark:text-white">{item.quantity}</span> <span className="text-sm text-gray-500">{item.unit}</span>
                               </td>
                               <td className="py-3 px-4">
-                                <div className="relative">
+                                <div className="relative flex items-center gap-1.5">
                                   <input
                                     type="text"
                                     disabled={order.status !== 'pending'}
@@ -129,15 +129,34 @@ export default function IncomingOrders({
                                     onChange={(e) => {
                                       handlePriceChange(order.id, item.id, 'searchName', e.target.value);
                                       if (e.target.value === '') {
-                                        handlePriceChange(order.id, item.id, 'inventoryId', '');
+                                        handlePriceChange(order.id, item.id, {
+                                          inventoryId: '',
+                                          stockDeductQty: ''
+                                        });
                                       }
                                     }}
                                     onFocus={() => handlePriceChange(order.id, item.id, 'isSearchFocused', true)}
                                     onBlur={() => setTimeout(() => handlePriceChange(order.id, item.id, 'isSearchFocused', false), 200)}
-                                    className="w-48 md:w-64 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
+                                    className="w-48 md:w-60 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
                                   />
+                                  {item.inventoryId && order.status === 'pending' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        handlePriceChange(order.id, item.id, {
+                                          inventoryId: '',
+                                          searchName: '',
+                                          stockDeductQty: ''
+                                        });
+                                      }}
+                                      className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
+                                      title="Batalkan pilihan stok"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  )}
                                   {item.isSearchFocused && item.searchName && item.searchName.length > 0 && (
-                                    <div className="absolute left-0 z-50 min-w-[260px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto flex flex-col whitespace-normal divide-y divide-gray-100 dark:divide-slate-700">
+                                    <div className="absolute left-0 top-full z-50 min-w-[280px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto flex flex-col whitespace-normal divide-y divide-gray-100 dark:divide-slate-700">
                                       {inventories
                                         .filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase()))
                                         .map(inv => (
@@ -175,13 +194,51 @@ export default function IncomingOrders({
                                     </div>
                                   )}
                                 </div>
-                                {item.inventoryId && (
-                                  inventories.find(i => i.id == item.inventoryId)?.stock < parseFloat(item.quantity)
-                                ) && (
-                                  <div className="text-[10px] text-red-500 mt-1 font-medium leading-tight">
-                                    ⚠️ Kurang {parseFloat(item.quantity) - inventories.find(i => i.id == item.inventoryId).stock} {item.unit}
-                                  </div>
-                                )}
+                                {item.inventoryId && (() => {
+                                  const selectedInv = inventories.find(i => i.id == item.inventoryId);
+                                  const deductVal = parseFloat(item.stockDeductQty || 0);
+                                  const stockAvailable = parseFloat(selectedInv?.stock || 0);
+                                  const isOverStock = deductVal > stockAvailable;
+
+                                  return (
+                                    <div className="mt-2 p-2 bg-blue-50/80 dark:bg-slate-700/60 rounded-xl border border-blue-100 dark:border-slate-600 text-xs space-y-1.5 max-w-[260px]">
+                                      <div className="flex items-center justify-between text-gray-600 dark:text-gray-300">
+                                        <span>Stok Gudang:</span>
+                                        <span className="font-bold text-gray-900 dark:text-white">
+                                          {selectedInv?.stock} {selectedInv?.unit}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 pt-1 border-t border-blue-200/50 dark:border-slate-600">
+                                        <label className="text-[11px] font-bold text-gray-700 dark:text-gray-300 shrink-0">
+                                          Qty Potong:
+                                        </label>
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          step="any"
+                                          disabled={order.status !== 'pending'}
+                                          placeholder="0"
+                                          value={item.stockDeductQty !== undefined ? item.stockDeductQty : ''}
+                                          onChange={(e) => handlePriceChange(order.id, item.id, 'stockDeductQty', e.target.value)}
+                                          className="w-20 px-2 py-1 text-center font-bold text-xs rounded-lg border border-gray-300 dark:border-slate-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 shadow-inner"
+                                        />
+                                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                          {selectedInv?.unit}
+                                        </span>
+                                      </div>
+                                      {isOverStock && (
+                                        <div className="text-[10px] text-red-600 dark:text-red-400 font-bold leading-tight">
+                                          ⚠️ Melebihi stok! (Kurang {deductVal - stockAvailable} {selectedInv?.unit})
+                                        </div>
+                                      )}
+                                      {!item.stockDeductQty && order.status === 'pending' && (
+                                        <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium leading-tight">
+                                          ℹ️ Isi qty di atas untuk memotong stok gudang
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                               </td>
                               <td className="py-3 px-4">
                                 <div className="relative w-32 md:w-36">

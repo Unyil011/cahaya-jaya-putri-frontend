@@ -121,6 +121,7 @@ export default function AdminDashboard() {
                   hpp: (oldItem.hpp !== undefined && oldItem.hpp !== '') ? oldItem.hpp : newItem.hpp,
                   sellingPrice: (oldItem.sellingPrice !== undefined && oldItem.sellingPrice !== '') ? oldItem.sellingPrice : newItem.sellingPrice,
                   inventoryId: (oldItem.inventoryId !== undefined) ? oldItem.inventoryId : newItem.inventoryId,
+                  stockDeductQty: (oldItem.stockDeductQty !== undefined) ? oldItem.stockDeductQty : newItem.stockDeductQty,
                 };
               }
               return newItem;
@@ -213,7 +214,23 @@ export default function AdminDashboard() {
       return;
     }
 
-        try {
+    // Validasi Qty Potong Stok untuk item yang ditautkan ke stok gudang
+    for (const item of order.items) {
+      if (item.inventoryId) {
+        const deductQty = parseFloat(item.stockDeductQty);
+        if (!item.stockDeductQty || isNaN(deductQty) || deductQty <= 0) {
+          toast.error(`Mohon isi Qty Potong Stok untuk "${item.itemName}" atau hapus pilihan stok gudang jika tidak memotong.`);
+          return;
+        }
+        const { data: invData } = await supabase.from('inventory').select('item_name, stock, unit').eq('id', item.inventoryId).single();
+        if (invData && deductQty > parseFloat(invData.stock)) {
+          toast.error(`Stok "${invData.item_name}" tidak cukup! Tersisa: ${invData.stock} ${invData.unit}`);
+          return;
+        }
+      }
+    }
+
+    try {
       setIsSubmitting(true);
       
       for (const item of order.items) {
@@ -222,10 +239,15 @@ export default function AdminDashboard() {
           selling_price: parseFloat(item.sellingPrice) 
         }).eq('id', item.id);
         
-        if (item.inventoryId) {
-          const invData = await supabase.from('inventory').select('stock').eq('id', item.inventoryId).single();
-          if (invData.data) {
-             await supabase.from('inventory').update({ stock: parseFloat(invData.data.stock) - parseFloat(item.quantity) }).eq('id', item.inventoryId);
+        // Potong stok gudang sesuai Qty Potong manual yang diisi admin
+        if (item.inventoryId && item.stockDeductQty) {
+          const deductAmount = parseFloat(item.stockDeductQty);
+          if (deductAmount > 0) {
+            const { data: invData } = await supabase.from('inventory').select('stock').eq('id', item.inventoryId).single();
+            if (invData) {
+              const newStock = Math.max(0, parseFloat(invData.stock) - deductAmount);
+              await supabase.from('inventory').update({ stock: newStock }).eq('id', item.inventoryId);
+            }
           }
         }
       }
@@ -237,7 +259,7 @@ export default function AdminDashboard() {
       
       setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'priced', total_amount: total } : o));
       setExpandedOrder(null);
-      toast.success('Harga disimpan! Pesanan masuk ke tahap Diproses.');
+      toast.success('Harga disimpan & stok gudang berhasil dipotong sesuai qty!');
     } catch (error) {
       console.error(error);
       toast.error('Gagal menyimpan harga!');
