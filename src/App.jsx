@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
@@ -16,6 +17,47 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 };
 
 function App() {
+  useEffect(() => {
+    // 1. Matikan scroll mouse pada semua input number agar angka tidak berubah
+    const handleWheel = (e) => {
+      if (e.target && e.target.type === 'number') {
+        e.preventDefault();
+        e.target.blur();
+      }
+    };
+
+    // 2. Cegah pengetikan tanda minus '-' atau notasi eksponen 'e'
+    const handleKeyDown = (e) => {
+      if (e.target && e.target.type === 'number') {
+        if (e.key === '-' || e.key === 'Minus' || e.key === 'e' || e.key === 'E') {
+          e.preventDefault();
+        }
+      }
+    };
+
+    // 3. Pencegahan jika angka minus ditempel/paste
+    const handleInput = (e) => {
+      if (e.target && e.target.type === 'number') {
+        if (e.target.value.includes('-')) {
+          e.target.value = e.target.value.replace(/-/g, '');
+        }
+        if (parseFloat(e.target.value) < 0) {
+          e.target.value = '0';
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('input', handleInput);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('input', handleInput);
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       {/* Global Toast Configuration for Glassmorphism */}

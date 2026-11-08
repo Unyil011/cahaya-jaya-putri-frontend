@@ -315,6 +315,7 @@ const StockHistory = ({ setCurrentView }) => {
                           <label className="block text-xs font-medium text-gray-500 mb-1">HPP Beli (Rp)</label>
                           <input
                             type="number"
+                            min="0"
                             required
                             placeholder="Harga Pokok"
                             value={item.hpp}
@@ -327,6 +328,7 @@ const StockHistory = ({ setCurrentView }) => {
                           <label className="block text-xs font-medium text-gray-500 mb-1">Qty Masuk</label>
                           <input
                             type="number"
+                            min="0"
                             step="0.01"
                             required
                             placeholder="Qty"

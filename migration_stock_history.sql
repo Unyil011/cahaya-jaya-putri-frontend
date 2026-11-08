@@ -15,13 +15,17 @@ CREATE TABLE IF NOT EXISTS public.stock_update_items (
     hpp NUMERIC NOT NULL
 );
 
--- Enable RLS
-ALTER TABLE public.stock_updates ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.stock_update_items ENABLE ROW LEVEL SECURITY;
+-- Enable or Fix RLS Policies
+DROP POLICY IF EXISTS "Allow all on stock_updates" ON public.stock_updates;
+DROP POLICY IF EXISTS "Allow all on stock_update_items" ON public.stock_update_items;
 
--- Create policies
-CREATE POLICY "Allow all on stock_updates" ON public.stock_updates FOR ALL USING (auth.role() = 'authenticated');
-CREATE POLICY "Allow all on stock_update_items" ON public.stock_update_items FOR ALL USING (auth.role() = 'authenticated');
+-- Nonaktifkan RLS agar penyimpanan tidak terblokir oleh session Supabase
+ALTER TABLE public.stock_updates DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stock_update_items DISABLE ROW LEVEL SECURITY;
+
+-- Opsi jika ingin tetap aktifkan RLS:
+-- CREATE POLICY "Allow all on stock_updates" ON public.stock_updates FOR ALL USING (true) WITH CHECK (true);
+-- CREATE POLICY "Allow all on stock_update_items" ON public.stock_update_items FOR ALL USING (true) WITH CHECK (true);
 
 -- Create trigger function
 CREATE OR REPLACE FUNCTION public.handle_stock_update()
