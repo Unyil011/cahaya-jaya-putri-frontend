@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, ChevronRight, CheckCircle, Printer, FileText, X } from 'lucide-react';
+import { Package, ChevronRight, CheckCircle, Printer, FileText, X, GitFork, Plus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../supabaseClient';
 
@@ -11,6 +11,9 @@ export default function IncomingOrders({
   setExpandedOrder,
   handlePriceChange,
   handleSavePrices,
+  handleSplitItem,
+  handleAddSplitSubItem,
+  handleDeleteSplitItem,
   setOrders,
   orders,
   isDarkMode,
@@ -141,15 +144,61 @@ export default function IncomingOrders({
                             <th className="py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300">Harga Jual</th>
                             <th className="py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300 text-right">Total HPP</th>
                             <th className="py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300 text-right">Total Harga</th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-600 dark:text-gray-300 text-center w-24">Aksi</th>
                           </tr>
                         </thead>
                         <tbody>
                           {order.items.map((item, index) => (
-                            <tr key={item.id} className="border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                            <tr key={item.id} className={`border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors ${item.isSplit ? 'bg-purple-50/20 dark:bg-purple-950/20' : ''}`}>
                               <td className="py-3 px-4 text-center font-bold text-gray-400">{index + 1}</td>
-                              <td className="py-3 px-4 font-bold text-gray-900 dark:text-white max-w-[200px] truncate" title={item.itemName}>{item.itemName}</td>
+                              <td className="py-3 px-4">
+                                {item.isSplit && order.status === 'pending' ? (
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 font-bold px-1.5 py-0.5 rounded">
+                                        Pecahan
+                                      </span>
+                                    </div>
+                                    <input
+                                      type="text"
+                                      value={item.itemName}
+                                      onChange={(e) => handlePriceChange(order.id, item.id, 'itemName', e.target.value)}
+                                      placeholder="Nama barang..."
+                                      className="w-48 px-2 py-1 text-sm font-semibold rounded-lg border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <div className="font-bold text-gray-900 dark:text-white max-w-[200px] truncate" title={item.itemName}>
+                                      {item.itemName}
+                                    </div>
+                                    {item.isSplit && (
+                                      <span className="inline-block text-[10px] bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 font-bold px-1.5 py-0.2 rounded mt-0.5">
+                                        Pecahan
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
                               <td className="py-3 px-4 text-center">
-                                <span className="font-bold text-gray-900 dark:text-white">{item.quantity}</span> <span className="text-sm text-gray-500">{item.unit}</span>
+                                {item.isSplit && order.status === 'pending' ? (
+                                  <div className="flex items-center justify-center gap-1">
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      value={item.quantity}
+                                      onChange={(e) => handlePriceChange(order.id, item.id, 'quantity', e.target.value)}
+                                      className="w-16 px-1.5 py-1 text-center text-sm font-bold rounded-lg border border-purple-300 dark:border-purple-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
+                                    />
+                                    <span className="text-xs text-gray-500">{item.unit}</span>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <span className="font-bold text-gray-900 dark:text-white">{item.quantity}</span>{' '}
+                                    <span className="text-sm text-gray-500">{item.unit}</span>
+                                  </div>
+                                )}
                               </td>
                               <td className="py-3 px-4">
                                 <div className="relative flex items-center gap-1.5">
@@ -279,6 +328,44 @@ export default function IncomingOrders({
                               </td>
                               <td className="py-3 px-4 text-right font-bold text-gray-900 dark:text-white">
                                 Rp {((parseFloat(item.sellingPrice) || 0) * parseFloat(item.quantity)).toLocaleString('id-ID')}
+                              </td>
+                              <td className="py-3 px-4 text-center">
+                                {order.status === 'pending' ? (
+                                  <div className="flex items-center justify-center gap-1.5">
+                                    {!item.isSplit ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSplitItem && handleSplitItem(order.id, item.id)}
+                                        className="px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-semibold border border-purple-200 dark:border-purple-800 flex items-center gap-1 transition-all shadow-sm active:scale-95"
+                                        title="Pecah baris pesanan ini menjadi beberapa sumber/merk berbeda"
+                                      >
+                                        <GitFork className="w-3.5 h-3.5" />
+                                        <span>Pecah</span>
+                                      </button>
+                                    ) : (
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleAddSplitSubItem && handleAddSplitSubItem(order.id, item.splitGroupId || item.id, item)}
+                                          className="p-1.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg border border-purple-200 dark:border-purple-800 transition-all shadow-sm active:scale-95"
+                                          title="Tambah pecahan baris lagi"
+                                        >
+                                          <Plus className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteSplitItem && handleDeleteSplitItem(order.id, item.id, item.splitGroupId || item.id)}
+                                          className="p-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800 transition-all shadow-sm active:scale-95"
+                                          title="Hapus baris pecahan ini"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400 text-xs">-</span>
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -411,6 +498,9 @@ export default function IncomingOrders({
                       searchName: inv.item_name,
                       isSearchFocused: false
                     };
+                    if (currentItem.isSplit) {
+                      updates.itemName = inv.item_name;
+                    }
                     if (inv.hpp !== undefined && inv.hpp !== null && inv.hpp !== '') {
                       updates.hpp = inv.hpp;
                     }

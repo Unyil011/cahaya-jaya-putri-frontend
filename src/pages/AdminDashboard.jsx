@@ -106,27 +106,21 @@ export default function AdminDashboard() {
           const oldOrder = prevOrders.find(o => o.id === newOrder.id);
           if (!oldOrder) return newOrder;
           
-          return {
-            ...newOrder,
-            items: newOrder.items.map(newItem => {
-              const oldItem = oldOrder.items.find(i => i.id === newItem.id);
-              if (!oldItem) return newItem;
-              
-              // Preserve local edits if they exist and order is still pending
-              if (newOrder.status === 'pending') {
-                return {
-                  ...newItem,
-                  searchName: oldItem.searchName !== undefined ? oldItem.searchName : newItem.searchName,
-                  isSearchFocused: oldItem.isSearchFocused !== undefined ? oldItem.isSearchFocused : newItem.isSearchFocused,
-                  hpp: (oldItem.hpp !== undefined && oldItem.hpp !== '') ? oldItem.hpp : newItem.hpp,
-                  sellingPrice: (oldItem.sellingPrice !== undefined && oldItem.sellingPrice !== '') ? oldItem.sellingPrice : newItem.sellingPrice,
-                  inventoryId: (oldItem.inventoryId !== undefined) ? oldItem.inventoryId : newItem.inventoryId,
-                  stockDeductQty: (oldItem.stockDeductQty !== undefined) ? oldItem.stockDeductQty : newItem.stockDeductQty,
-                };
-              }
-              return newItem;
-            })
-          };
+          if (newOrder.status === 'pending') {
+            const hasLocalEditsOrSplits = oldOrder.items.some(
+              i => i.isSplit || i.isNew || String(i.id).startsWith('temp-') || (i.hpp !== undefined && i.hpp !== '') || (i.sellingPrice !== undefined && i.sellingPrice !== '') || i.searchName !== undefined || i.inventoryId || i.stockDeductQty
+            ) || (oldOrder.deletedItemIds && oldOrder.deletedItemIds.length > 0);
+
+            if (hasLocalEditsOrSplits) {
+              return {
+                ...newOrder,
+                items: oldOrder.items,
+                deletedItemIds: oldOrder.deletedItemIds || []
+              };
+            }
+          }
+          
+          return newOrder;
         });
       });
     } catch (e) {
@@ -197,12 +191,146 @@ export default function AdminDashboard() {
     }));
   };
 
+  const handleSplitItem = (orderId, itemId) => {
+    setOrders(prevOrders => prevOrders.map(order => {
+      if (order.id !== orderId) return order;
+      
+      const itemIndex = order.items.findIndex(i => i.id === itemId);
+      if (itemIndex === -1) return order;
+      
+      const targetItem = order.items[itemIndex];
+      const origQty = parseFloat(targetItem.quantity) || 0;
+      const part1Qty = Math.floor(origQty / 2) || (origQty > 0 ? 1 : 0);
+      const part2Qty = (origQty - part1Qty) > 0 ? (origQty - part1Qty) : part1Qty;
+      const splitGroupId = targetItem.id;
+      
+      const part1 = {
+        ...targetItem,
+        itemName: `${targetItem.itemName} (Merk A)`,
+        quantity: part1Qty,
+        isSplit: true,
+        splitGroupId
+      };
+      
+      const part2 = {
+        id: `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        itemName: `${targetItem.itemName} (Merk B)`,
+        quantity: part2Qty,
+        unit: targetItem.unit,
+        hpp: targetItem.hpp || '',
+        sellingPrice: targetItem.sellingPrice || '',
+        inventoryId: '',
+        stockDeductQty: '',
+        isNew: true,
+        isSplit: true,
+        splitGroupId
+      };
+      
+      const newItems = [...order.items];
+      newItems.splice(itemIndex, 1, part1, part2);
+      
+      return {
+        ...order,
+        items: newItems
+      };
+    }));
+    toast.success('Baris berhasil dipecah menjadi 2 bagian.');
+  };
+
+  const handleAddSplitSubItem = (orderId, splitGroupId, refItem) => {
+    setOrders(prevOrders => prevOrders.map(order => {
+      if (order.id !== orderId) return order;
+      
+      const lastIndex = order.items.map(i => i.splitGroupId || i.id).lastIndexOf(splitGroupId);
+      if (lastIndex === -1) return order;
+      
+      const countInGroup = order.items.filter(i => (i.splitGroupId || i.id) === splitGroupId).length;
+      const letter = String.fromCharCode(65 + countInGroup);
+      const baseCleanName = (refItem?.itemName || 'Barang').replace(/\s*\(Merk\s+[A-Z]\)$/i, '');
+      
+      const newItem = {
+        id: `temp-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        itemName: `${baseCleanName} (Merk ${letter})`,
+        quantity: 0,
+        unit: refItem?.unit || 'Pcs',
+        hpp: '',
+        sellingPrice: '',
+        inventoryId: '',
+        stockDeductQty: '',
+        isNew: true,
+        isSplit: true,
+        splitGroupId
+      };
+      
+      const newItems = [...order.items];
+      newItems.splice(lastIndex + 1, 0, newItem);
+      
+      return {
+        ...order,
+        items: newItems
+      };
+    }));
+    toast.success('Pecahan baru ditambahkan.');
+  };
+
+  const handleDeleteSplitItem = (orderId, itemId, splitGroupId) => {
+    setOrders(prevOrders => prevOrders.map(order => {
+      if (order.id !== orderId) return order;
+      
+      const itemsInGroup = order.items.filter(i => (i.splitGroupId || i.id) === splitGroupId);
+      if (itemsInGroup.length <= 1) {
+        toast.error('Minimal harus ada 1 baris.');
+        return order;
+      }
+      
+      const itemToDelete = order.items.find(i => i.id === itemId);
+      let deletedItemIds = order.deletedItemIds || [];
+      if (itemToDelete && !itemToDelete.isNew && !String(itemToDelete.id).startsWith('temp-')) {
+        deletedItemIds = [...deletedItemIds, itemToDelete.id];
+      }
+      
+      const remainingItems = order.items.filter(i => i.id !== itemId);
+      const remainingInGroup = remainingItems.filter(i => (i.splitGroupId || i.id) === splitGroupId);
+      if (remainingInGroup.length === 1) {
+        const remainingId = remainingInGroup[0].id;
+        return {
+          ...order,
+          items: remainingItems.map(i => i.id === remainingId ? { ...i, isSplit: false, splitGroupId: undefined } : i),
+          deletedItemIds
+        };
+      }
+      
+      return {
+        ...order,
+        items: remainingItems,
+        deletedItemIds
+      };
+    }));
+    toast.success('Baris pecahan dihapus.');
+  };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSavePrices = async (orderId) => {
     if (isSubmitting) return;
 
     const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Validasi nama barang tidak boleh kosong
+    const isNamesValid = order.items.every(item => item.itemName && item.itemName.trim().length > 0);
+    if (!isNamesValid) {
+      toast.error('Nama barang tidak boleh kosong!');
+      return;
+    }
+
+    // Validasi kuantitas harus valid
+    const isQtyValid = order.items.every(item => item.quantity !== '' && parseFloat(item.quantity) >= 0);
+    if (!isQtyValid) {
+      toast.error('Kuantitas (Qty) tidak boleh kosong!');
+      return;
+    }
+
     const isComplete = order.items.every(item => item.hpp !== '' && item.sellingPrice !== '');
     if (!isComplete) {
       toast.error('Mohon isi semua HPP dan Harga Jual!');
@@ -233,11 +361,35 @@ export default function AdminDashboard() {
     try {
       setIsSubmitting(true);
       
+      // 1. Hapus item yang dihapus pada pecahan
+      if (order.deletedItemIds && order.deletedItemIds.length > 0) {
+        await supabase.from('order_items').delete().in('id', order.deletedItemIds);
+      }
+
+      // 2. Insert atau Update item
       for (const item of order.items) {
-        await supabase.from('order_items').update({ 
-          hpp: parseFloat(item.hpp), 
-          selling_price: parseFloat(item.sellingPrice) 
-        }).eq('id', item.id);
+        if (item.isNew || String(item.id).startsWith('temp-')) {
+          // INSERT item baru pecahan
+          const { error: insErr } = await supabase.from('order_items').insert({
+            order_id: orderId,
+            item_name: item.itemName,
+            quantity: parseFloat(item.quantity),
+            unit: item.unit || 'Pcs',
+            hpp: parseFloat(item.hpp),
+            selling_price: parseFloat(item.sellingPrice)
+          });
+          if (insErr) throw insErr;
+        } else {
+          // UPDATE item yang sudah ada
+          const { error: updErr } = await supabase.from('order_items').update({ 
+            item_name: item.itemName,
+            quantity: parseFloat(item.quantity),
+            unit: item.unit || 'Pcs',
+            hpp: parseFloat(item.hpp), 
+            selling_price: parseFloat(item.sellingPrice) 
+          }).eq('id', item.id);
+          if (updErr) throw updErr;
+        }
         
         // Potong stok gudang sesuai Qty Potong manual yang diisi admin
         if (item.inventoryId && item.stockDeductQty) {
@@ -257,12 +409,12 @@ export default function AdminDashboard() {
       const { error } = await supabase.from('orders').update({ status: 'priced', total_amount: total }).eq('id', orderId);
       if (error) throw error;
       
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'priced', total_amount: total } : o));
       setExpandedOrder(null);
-      toast.success('Harga disimpan & stok gudang berhasil dipotong sesuai qty!');
+      await fetchOrders(false);
+      toast.success('Harga disimpan & stok gudang berhasil dipotong!');
     } catch (error) {
       console.error(error);
-      toast.error('Gagal menyimpan harga!');
+      toast.error('Gagal menyimpan harga: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -573,6 +725,9 @@ export default function AdminDashboard() {
                 setExpandedOrder={setExpandedOrder}
                 handlePriceChange={handlePriceChange}
                 handleSavePrices={handleSavePrices}
+                handleSplitItem={handleSplitItem}
+                handleAddSplitSubItem={handleAddSplitSubItem}
+                handleDeleteSplitItem={handleDeleteSplitItem}
                 setOrders={setOrders}
                 orders={orders}
                 isDarkMode={isDarkMode}
