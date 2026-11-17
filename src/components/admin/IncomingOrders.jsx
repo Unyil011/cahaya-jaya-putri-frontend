@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronRight, CheckCircle, Printer, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -18,6 +19,37 @@ export default function IncomingOrders({
   getStatusBadge
 }) {
   const [inventories, setInventories] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState(null); // { orderId, itemId }
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 280 });
+
+  const updateDropdownPosition = (orderId, itemId) => {
+    const inputEl = document.getElementById(`stock-search-${orderId}-${itemId}`);
+    if (inputEl) {
+      const rect = inputEl.getBoundingClientRect();
+      const openUpward = rect.bottom + 230 > window.innerHeight && rect.top > 240;
+      setDropdownPosition({
+        top: openUpward ? rect.top - 230 : rect.bottom + 4,
+        left: rect.left,
+        width: Math.max(rect.width, 300)
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!activeDropdown) return;
+    updateDropdownPosition(activeDropdown.orderId, activeDropdown.itemId);
+
+    const handleScrollOrResize = () => {
+      updateDropdownPosition(activeDropdown.orderId, activeDropdown.itemId);
+    };
+
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [activeDropdown]);
 
     const handleTogglePayment = async (order, newStatus) => {
     const toastId = toast.loading('Mengubah status pembayaran...');
@@ -122,6 +154,7 @@ export default function IncomingOrders({
                               <td className="py-3 px-4">
                                 <div className="relative flex items-center gap-1.5">
                                   <input
+                                    id={`stock-search-${order.id}-${item.id}`}
                                     type="text"
                                     disabled={order.status !== 'pending'}
                                     placeholder="- Ketik nama stok -"
@@ -134,9 +167,18 @@ export default function IncomingOrders({
                                           stockDeductQty: ''
                                         });
                                       }
+                                      setActiveDropdown({ orderId: order.id, itemId: item.id });
+                                      updateDropdownPosition(order.id, item.id);
                                     }}
-                                    onFocus={() => handlePriceChange(order.id, item.id, 'isSearchFocused', true)}
-                                    onBlur={() => setTimeout(() => handlePriceChange(order.id, item.id, 'isSearchFocused', false), 200)}
+                                    onFocus={() => {
+                                      setActiveDropdown({ orderId: order.id, itemId: item.id });
+                                      updateDropdownPosition(order.id, item.id);
+                                    }}
+                                    onBlur={() => {
+                                      setTimeout(() => {
+                                        setActiveDropdown(prev => (prev?.orderId === order.id && prev?.itemId === item.id ? null : prev));
+                                      }, 200);
+                                    }}
                                     className="w-48 md:w-60 py-1.5 px-2 rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-pink-500 text-gray-900 dark:text-white text-sm"
                                   />
                                   {item.inventoryId && order.status === 'pending' && (
@@ -154,44 +196,6 @@ export default function IncomingOrders({
                                     >
                                       <X className="w-4 h-4" />
                                     </button>
-                                  )}
-                                  {item.isSearchFocused && item.searchName && item.searchName.length > 0 && (
-                                    <div className="absolute left-0 top-full z-50 min-w-[280px] w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-56 overflow-y-auto flex flex-col whitespace-normal divide-y divide-gray-100 dark:divide-slate-700">
-                                      {inventories
-                                        .filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase()))
-                                        .map(inv => (
-                                          <button
-                                            key={inv.id}
-                                            type="button"
-                                            onMouseDown={() => {
-                                              const updates = {
-                                                inventoryId: inv.id,
-                                                searchName: inv.item_name,
-                                                isSearchFocused: false
-                                              };
-                                              if (inv.hpp !== undefined && inv.hpp !== null && inv.hpp !== '') {
-                                                  updates.hpp = inv.hpp;
-                                                }
-                                                if (inv.selling_price !== undefined && inv.selling_price !== null && inv.selling_price !== '' && parseFloat(inv.selling_price) > 0) {
-                                                  updates.sellingPrice = inv.selling_price;
-                                                }
-                                              handlePriceChange(order.id, item.id, updates);
-                                            }}
-                                            className="w-full block text-left px-3.5 py-2.5 hover:bg-pink-50/60 dark:hover:bg-slate-700/60 text-gray-900 dark:text-white transition-colors"
-                                          >
-                                            <div className="font-semibold text-sm leading-tight text-gray-900 dark:text-white truncate">{inv.item_name}</div>
-                                            <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                                              <span className="font-medium text-gray-600 dark:text-gray-300">Stok: {inv.stock} {inv.unit}</span>
-                                              {inv.hpp ? <span>• HPP: Rp {parseInt(inv.hpp).toLocaleString('id-ID')}</span> : null}
-                                              {inv.selling_price ? <span className="text-pink-600 dark:text-pink-400 font-semibold">• Jual: Rp {parseInt(inv.selling_price).toLocaleString('id-ID')}</span> : null}
-                                            </div>
-                                          </button>
-                                        ))
-                                      }
-                                      {inventories.filter(inv => (inv.item_name || '').toLowerCase().includes((item.searchName !== undefined ? item.searchName : '').toLowerCase())).length === 0 && (
-                                        <div className="px-3 py-3 text-xs text-gray-500 text-center">Barang tidak ditemukan</div>
-                                      )}
-                                    </div>
                                   )}
                                 </div>
                                 {item.inventoryId && (() => {
@@ -372,6 +376,77 @@ export default function IncomingOrders({
 
           </motion.div>
         ))
+      )}
+
+      {typeof document !== 'undefined' && createPortal(
+        activeDropdown && (() => {
+          const currentOrder = orders.find(o => o.id === activeDropdown.orderId);
+          const currentItem = currentOrder?.items?.find(i => i.id === activeDropdown.itemId);
+          const searchVal = (currentItem?.searchName !== undefined ? currentItem.searchName : '').trim();
+          if (!currentItem || searchVal.length === 0) return null;
+
+          const filtered = inventories.filter(inv =>
+            (inv.item_name || '').toLowerCase().includes(searchVal.toLowerCase())
+          );
+
+          return (
+            <div
+              style={{
+                position: 'fixed',
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`,
+                width: `${dropdownPosition.width}px`,
+                zIndex: 99999,
+              }}
+              className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl max-h-60 overflow-y-auto flex flex-col whitespace-normal divide-y divide-gray-100 dark:divide-slate-700"
+            >
+              {filtered.map(inv => (
+                <button
+                  key={inv.id}
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    const updates = {
+                      inventoryId: inv.id,
+                      searchName: inv.item_name,
+                      isSearchFocused: false
+                    };
+                    if (inv.hpp !== undefined && inv.hpp !== null && inv.hpp !== '') {
+                      updates.hpp = inv.hpp;
+                    }
+                    if (inv.selling_price !== undefined && inv.selling_price !== null && inv.selling_price !== '' && parseFloat(inv.selling_price) > 0) {
+                      updates.sellingPrice = inv.selling_price;
+                    }
+                    handlePriceChange(currentOrder.id, currentItem.id, updates);
+                    setActiveDropdown(null);
+                  }}
+                  className="w-full block text-left px-3.5 py-2.5 hover:bg-pink-50/70 dark:hover:bg-slate-700/70 text-gray-900 dark:text-white transition-colors cursor-pointer"
+                >
+                  <div className="font-semibold text-sm leading-tight text-gray-900 dark:text-white truncate">
+                    {inv.item_name}
+                  </div>
+                  <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className="font-medium text-gray-600 dark:text-gray-300">
+                      Stok: {inv.stock} {inv.unit}
+                    </span>
+                    {inv.hpp ? <span>• HPP: Rp {parseInt(inv.hpp).toLocaleString('id-ID')}</span> : null}
+                    {inv.selling_price ? (
+                      <span className="text-pink-600 dark:text-pink-400 font-semibold">
+                        • Jual: Rp {parseInt(inv.selling_price).toLocaleString('id-ID')}
+                      </span>
+                    ) : null}
+                  </div>
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <div className="px-3 py-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Barang tidak ditemukan
+                </div>
+              )}
+            </div>
+          );
+        })(),
+        document.body
       )}
     </div>
   );
