@@ -7,7 +7,7 @@ import ClientManagement from '../components/admin/ClientManagement';
 import StockHistory from '../components/admin/StockHistory';
 import PurchaseOrders from '../components/admin/PurchaseOrders';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X , PackagePlus} from 'lucide-react';
+import { Home, Inbox, History, Undo2, Boxes, ShoppingBag, LogOut, Package, PackageOpen, Archive, User, Moon, Sun, ChevronDown, Users, FileText, Printer, CheckCircle, ChevronRight, Search, Filter, Eye, Trash2, X, PackagePlus, PenLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -16,6 +16,7 @@ import HistoryOrders from '../components/admin/HistoryOrders';
 import IncomingOrders from '../components/admin/IncomingOrders';
 import FilterDrawer from '../components/admin/FilterDrawer';
 import ConfirmModal from '../components/admin/ConfirmModal';
+import AdminCreateOrder from '../components/admin/AdminCreateOrder';
 import { supabase } from '../supabaseClient';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 function NavItem({ icon: Icon, label, isActive, onClick, badge }) {
@@ -543,6 +544,7 @@ export default function AdminDashboard() {
 
         <nav className="flex-1 space-y-2">
           <NavItem icon={Home} label="Beranda" isActive={currentView === 'overview'} onClick={() => setCurrentView('overview')} />
+          <NavItem icon={PenLine} label="Buat Pesanan" isActive={currentView === 'create_order'} onClick={() => setCurrentView('create_order')} />
           <NavItem icon={Inbox} label="Pesanan Masuk" isActive={currentView === 'incoming'} onClick={() => setCurrentView('incoming')} badge={activeOrdersCount} />
           <NavItem icon={History} label="Riwayat Pesanan" isActive={currentView === 'history'} onClick={() => setCurrentView('history')} />
           <NavItem icon={Undo2} label="Ajuan Retur" isActive={currentView === 'returns'} onClick={() => setCurrentView('returns')} badge={pendingReturnsCount} />
@@ -563,6 +565,8 @@ export default function AdminDashboard() {
             <h1 className="text-lg md:text-xl font-bold text-mbg-blue-900 dark:text-white transition-colors flex items-center gap-2">
               {currentView === 'overview' ? (
                 <><Home className="w-5 h-5 text-mbg-blue-600 md:hidden" /> Ringkasan Dashboard</>
+              ) : currentView === 'create_order' ? (
+                <><PenLine className="w-5 h-5 text-pink-600 md:hidden" /> Buat Pesanan Manual</>
               ) : currentView === 'incoming' ? (
                 <><Inbox className="w-5 h-5 text-pink-600 md:hidden" /> Pesanan Masuk</>
               ) : currentView === 'history' ? (
@@ -580,7 +584,7 @@ export default function AdminDashboard() {
               )}
             </h1>
             <p className="hidden md:block text-xs md:text-sm text-gray-600 dark:text-gray-400 mt-0.5 transition-colors">
-              {currentView === 'overview' ? 'Ringkasan performa dan notifikasi penting.' : currentView === 'incoming' ? 'Kelola pesanan aktif dari SPPG, tentukan HPP & Harga Jual.' : currentView === 'history' ? 'Arsip pesanan SPPG yang sudah selesai.' : currentView === 'returns' ? 'Kelola komplain dan pengembalian barang dari SPPG.' : currentView === 'inventory' ? 'Kelola inventaris dan stok barang di gudang.' : currentView === 'stock_updates' ? 'Kelola barang masuk dan pantau riwayat pergerakan stok.' : currentView === 'purchase_orders' ? 'Buat dan cetak surat pesanan barang ke supplier.' : 'Kelola akun SPPG.'}
+              {currentView === 'overview' ? 'Ringkasan performa dan notifikasi penting.' : currentView === 'create_order' ? 'Buat pesanan manual atas nama SPPG yang terdaftar.' : currentView === 'incoming' ? 'Kelola pesanan aktif dari SPPG, tentukan HPP & Harga Jual.' : currentView === 'history' ? 'Arsip pesanan SPPG yang sudah selesai.' : currentView === 'returns' ? 'Kelola komplain dan pengembalian barang dari SPPG.' : currentView === 'inventory' ? 'Kelola inventaris dan stok barang di gudang.' : currentView === 'stock_updates' ? 'Kelola barang masuk dan pantau riwayat pergerakan stok.' : currentView === 'purchase_orders' ? 'Buat dan cetak surat pesanan barang ke supplier.' : 'Kelola akun SPPG.'}
             </p>
           </div>
 
@@ -718,6 +722,8 @@ export default function AdminDashboard() {
           <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 relative z-10 custom-scrollbar">
             {currentView === 'overview' ? (
               <OverviewDashboard filteredOrders={filteredOrders} isDarkMode={isDarkMode} />
+            ) : currentView === 'create_order' ? (
+              <AdminCreateOrder isDarkMode={isDarkMode} setCurrentView={setCurrentView} />
             ) : currentView === 'incoming' ? (
               <IncomingOrders
                 filteredOrders={filteredOrders}
@@ -793,6 +799,14 @@ export default function AdminDashboard() {
             className={`p-1.5 rounded-xl flex flex-col items-center gap-1 transition-all ${currentView === 'overview' ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
           >
             <Home className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={() => setCurrentView('create_order')}
+            className={`p-1.5 rounded-xl flex flex-col items-center gap-1 transition-all ${currentView === 'create_order' ? 'text-pink-600 bg-pink-50 dark:bg-pink-900/30 dark:text-pink-400' : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800'}`}
+            title="Buat Pesanan"
+          >
+            <PenLine className="w-5 h-5" />
           </button>
 
           <button

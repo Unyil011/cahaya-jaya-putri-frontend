@@ -1,5 +1,8 @@
 ﻿import fs from 'fs';
-let code = fs.readFileSync('src/pages/ClientDashboard.jsx', 'utf8');
-code = code.replace("import { ShoppingCart, useState, useRef, useEffect } from 'react';", "import { useState, useRef, useEffect } from 'react';");
-fs.writeFileSync('src/pages/ClientDashboard.jsx', code);
-console.log("Fixed duplicate ShoppingCart import");
+let code = fs.readFileSync('src/components/admin/ClientManagement.jsx', 'utf8');
+
+code = code.replace(/client\.name\.toLowerCase/g, "(client.name || '').toLowerCase");
+code = code.replace(/client\.email\.toLowerCase/g, "(client.email || '').toLowerCase");
+
+fs.writeFileSync('src/components/admin/ClientManagement.jsx', code);
+console.log("Fixed ClientManagement undefined crashes");
